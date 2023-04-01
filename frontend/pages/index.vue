@@ -1,7 +1,17 @@
+<script setup>
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+
+const signIn = async () => {
+  const { user } = await signInWithPopup(useNuxtApp().$auth, new GoogleAuthProvider());
+  useCookie('user').value = user;
+};
+</script>
+
 <template>
   <Head>
     <Title>hello liz</Title>
   </Head>
+  <button @click="signIn">test</button>
   <h1>hello <span>liz</span>!</h1>
   <ol>
     <li>am schimbat <code>npm</code> în <code>yarn</code> 🐬</li>
