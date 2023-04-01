@@ -1,0 +1,16 @@
+{
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "devDependencies": {
+    "nuxt": "^3.3.2"
+  },
+  "dependencies": {
+    "firebase": "^9.19.1",
+    "twemoji": "^14.0.2"
+  }
+}
