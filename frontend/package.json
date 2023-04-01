@@ -10,7 +10,7 @@
     "nuxt": "^3.3.2"
   },
   "dependencies": {
-    "firebase": "^9.19.1",
+    "firebase": "^9.0.1",
     "twemoji": "^14.0.2"
   }
 }
