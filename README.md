@@ -1,0 +1,4 @@
+- firestore
+- functions
+- pub/sub
+- maps
