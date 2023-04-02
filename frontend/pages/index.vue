@@ -1,7 +1,7 @@
 <script setup>
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
-const signIn = async () => {
+const logIn = async () => {
   try {
     const { user } = await signInWithPopup(useNuxtApp().$auth, new GoogleAuthProvider());
     useCookie('user').value = user;
@@ -9,6 +9,7 @@ const signIn = async () => {
   }
   catch (error) {
     console.error(error);
+    alert(error.message);
   }
 };
 </script>
@@ -18,21 +19,5 @@ const signIn = async () => {
     <Title>Our chat</Title>
   </Head>
   <h1>Our chat</h1>
-  <button @click="signIn">Sign in</button>
+  <button @click="logIn">Sign in</button>
 </template>
-
-<style scoped>
-code {
-  padding: .15rem .25rem;
-  font-family: 'Source Code Pro', monospace;
-  background-color: #0004;
-}
-
-li {
-  margin: .5rem 0;
-}
-
-span, li::marker {
-  color: pink;
-}
-</style>
