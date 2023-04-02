@@ -1,7 +1,7 @@
 <script setup>
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
-const logIn = async () => {
+async function logIn() {
   try {
     const { user } = await signInWithPopup(useNuxtApp().$auth, new GoogleAuthProvider());
     useCookie('user').value = user;

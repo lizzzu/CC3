@@ -1,7 +1,7 @@
 <script setup>
 import { signOut } from 'firebase/auth';
 
-const logOut = async () => {
+async function logOut() {
   try {
     await signOut(useNuxtApp().$auth);
     useCookie('user').value = null;
