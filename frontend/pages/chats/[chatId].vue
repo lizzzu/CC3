@@ -14,7 +14,6 @@ export default {
       const chatDoc = await getDoc(chatRef);
       if (chatDoc.exists()) {
         this.chat = chatDoc.data();
-        console.log(this.chat);
       }
     }
     catch (error) {
@@ -28,6 +27,14 @@ export default {
   <Head>
     <Title>Chats</Title>
   </Head>
-  <h1>Name: {{ chat.name }}</h1>
-  <h2>Id: {{ chatId }}</h2>
+  <div v-if="chat != null">
+    <h1>Name: {{ chat.name }}</h1>
+    <h2>Id: {{ chatId }}</h2>
+    <div v-for="message in chat.messages" :key="message.id">
+      <p>Text: {{ message.text }}</p>
+      <p>User: {{ message.userId }}</p>
+      <p>Time: {{ message.timestamp.toDate() }}</p>
+    </div>
+  </div>
+  <p v-else>Loading...</p>
 </template>

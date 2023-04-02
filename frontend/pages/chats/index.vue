@@ -40,15 +40,14 @@ import { collection, query, where, onSnapshot } from '@firebase/firestore';
 export default {
   data() {
     return {
-      userId: '',
+      userId: useCookie('user').value.uid,
       chats: [],
       unsubscribeAuth: () => { },
       unsubscribeFirestore: () => { }
     };
   },
   async mounted() {
-    this.unsubscribeAuth = onAuthStateChanged(useNuxtApp().$auth, user => {
-      this.userId = user?.uid || '';
+    this.unsubscribeAuth = onAuthStateChanged(useNuxtApp().$auth, () => {
       this.unsubscribeFirestore = onSnapshot(query(
         collection(useNuxtApp().$firestore, 'chats'),
         where('users', 'array-contains', { userId: this.userId, accepted: true })
