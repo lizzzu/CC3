@@ -1,17 +1,22 @@
 <script>
-import { doc, getDoc } from '@firebase/firestore';
+import { doc, onSnapshot } from '@firebase/firestore';
 
 export default {
   data() {
     return {
       chatId: this.$route.params.chatId,
-      chat: null
+      chat: null,
+      newMessage: '',
+      unsubscribe: () => { }
     };
   },
-  async mounted() {
-    const chatRef = doc(this.$firestore, 'chats', this.chatId);
-    const chatDoc = await getDoc(chatRef);
-    this.chat = chatDoc.data();
+  mounted() {
+    this.unsubscribe = onSnapshot(doc(this.$firestore, 'chats', this.chatId), chatSnapshot => {
+      this.chat = chatSnapshot.data();
+    });
+  },
+  unmounted() {
+    this.unsubscribe();
   }
 }
 </script>
@@ -28,6 +33,9 @@ export default {
       <p>User: {{ message.userId }}</p>
       <p>Time: {{ message.timestamp.toDate() }}</p>
     </div>
+    <input v-model="newMessage" placeholder="Type..." />
+    <button>Send 🕊️</button>
   </div>
   <p v-else>Loading...</p>
+  <NuxtLink to="/chats">Back to chats</NuxtLink>
 </template>

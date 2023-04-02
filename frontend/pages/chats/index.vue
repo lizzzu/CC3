@@ -22,6 +22,7 @@ export default {
     return {
       userId: useCookie('user').value.uid,
       chats: [],
+      newChatName: '',
       unsubscribe: () => { }
     };
   },
@@ -46,7 +47,7 @@ export default {
   methods: {
     async addChat() {
       const chat = await addDoc(collection(this.$firestore, 'chats'), {
-        name: 'New chat',
+        name: this.newChatName,
         users: [{
           userId: this.userId,
           accepted: true
@@ -54,6 +55,7 @@ export default {
         messages: []
       });
       alert(`New chat created: ${chat.id}`);
+      this.newChatName = '';
     }
   }
 };
@@ -64,8 +66,9 @@ export default {
     <Title>Chats</Title>
   </Head>
   <h1>Chats</h1>
-  <button @click="logOut">Sign out</button>
-  <button @click="addChat">Create new chat</button>
+  <button @click="logOut">Sign out 🔒</button>
+  <input v-model="newChatName" placeholder="New chat name" />
+  <button @click="addChat" :disabled="newChatName === ''">Create new chat 📝</button>
   <p v-if="chats.length === 0">No chats yet</p>
   <TransitionGroup v-else tag="main">
     <NuxtLink v-for="chat of chats" :to="chat.url" :key="chat.url">{{ chat.name }}</NuxtLink>

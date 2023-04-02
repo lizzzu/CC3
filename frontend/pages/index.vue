@@ -19,7 +19,7 @@ async function logIn() {
     <Title>Our chat</Title>
   </Head>
   <h1>Our chat</h1>
-  <button @click="logIn">Sign in</button>
+  <button @click="logIn">Sign in 🔑</button>
 </template>
 
 <style scoped>
