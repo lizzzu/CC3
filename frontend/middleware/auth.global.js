@@ -1,6 +1,6 @@
 export default defineNuxtRouteMiddleware(to => {
   const user = useCookie('user').value;
-  if (to.path === '/chats' && !user) {
+  if (to.path.startsWith('/chats') && !user) {
     return navigateTo('/');
   }
   if (to.path === '/' && user) {

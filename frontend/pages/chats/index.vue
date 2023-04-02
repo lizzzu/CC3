@@ -37,23 +37,19 @@ async function addChat() {
 import { onAuthStateChanged } from '@firebase/auth';
 import { collection, query, where, onSnapshot } from '@firebase/firestore';
 
-const baseUrl
-  = process.env.NODE_ENV === 'production'
-  ? 'https://cloud-computing-3.netlify.app'
-  : 'http://localhost:3000';
-
 export default {
   data() {
     return {
       userId: '',
       chats: [],
-      unsubscribe: () => { }
+      unsubscribeAuth: () => { },
+      unsubscribeFirestore: () => { }
     };
   },
   async mounted() {
-    onAuthStateChanged(useNuxtApp().$auth, user => {
+    this.unsubscribeAuth = onAuthStateChanged(useNuxtApp().$auth, user => {
       this.userId = user?.uid || '';
-      this.unsubscribe = onSnapshot(query(
+      this.unsubscribeFirestore = onSnapshot(query(
         collection(useNuxtApp().$firestore, 'chats'),
         where('users', 'array-contains', { userId: this.userId, accepted: true })
       ), chatsSnapshot => {
@@ -61,7 +57,7 @@ export default {
         chatsSnapshot.forEach(chat => {
           chats.push({
             name: `${chat.data().name}: ${chat.id}`,
-            url: `${baseUrl}/chats/${chat.id}`
+            url: `/chats/${chat.id}`
           });
         });
         this.chats = [...chats];
@@ -69,7 +65,8 @@ export default {
     });
   },
   unmounted() {
-    this.unsubscribe();
+    this.unsubscribeAuth();
+    this.unsubscribeFirestore();
   }
 };
 </script>
@@ -88,6 +85,17 @@ export default {
 </template>
 
 <style scoped>
+.v-enter-active,
+.v-leave-active {
+  transition: all .5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+  transform: translateX(50px);
+}
+
 h1 {
   margin: 0 auto 2rem auto;
   width: fit-content;
