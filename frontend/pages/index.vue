@@ -21,3 +21,12 @@ async function logIn() {
   <h1>Our chat</h1>
   <button @click="logIn">Sign in</button>
 </template>
+
+<style scoped>
+h1 {
+  margin: 0 auto 2rem auto;
+  width: fit-content;
+  font-size: 3rem;
+  text-align: center;
+}
+</style>
