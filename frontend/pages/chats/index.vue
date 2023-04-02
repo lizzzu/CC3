@@ -1,6 +1,5 @@
 <script setup>
 import { signOut } from 'firebase/auth';
-import { addDoc, collection } from '@firebase/firestore';
 
 async function logOut() {
   try {
@@ -13,59 +12,49 @@ async function logOut() {
     alert(error.message);
   }
 };
-
-async function addChat() {
-  try {
-    const chat = await addDoc(collection(useNuxtApp().$firestore, 'chats'), {
-      name: 'New chat',
-      users: [{
-        userId: useCookie('user').value.uid,
-        accepted: true
-      }],
-      messages: []
-    });
-    alert(`New chat created: ${chat.id}`);
-  }
-  catch (error) {
-    console.error(error);
-    alert(error.message);
-  }
-};
 </script>
 
 <script>
-import { onAuthStateChanged } from '@firebase/auth';
-import { collection, query, where, onSnapshot } from '@firebase/firestore';
+import { addDoc, collection, query, where, onSnapshot } from '@firebase/firestore';
 
 export default {
   data() {
     return {
       userId: useCookie('user').value.uid,
       chats: [],
-      unsubscribeAuth: () => { },
-      unsubscribeFirestore: () => { }
+      unsubscribe: () => { }
     };
   },
   async mounted() {
-    this.unsubscribeAuth = onAuthStateChanged(useNuxtApp().$auth, () => {
-      this.unsubscribeFirestore = onSnapshot(query(
-        collection(useNuxtApp().$firestore, 'chats'),
-        where('users', 'array-contains', { userId: this.userId, accepted: true })
-      ), chatsSnapshot => {
-        const chats = [];
-        chatsSnapshot.forEach(chat => {
-          chats.push({
-            name: `${chat.data().name}: ${chat.id}`,
-            url: `/chats/${chat.id}`
-          });
+    this.unsubscribe = onSnapshot(query(
+      collection(this.$firestore, 'chats'),
+      where('users', 'array-contains', { userId: this.userId, accepted: true })
+    ), chatsSnapshot => {
+      const chats = [];
+      chatsSnapshot.forEach(chat => {
+        chats.push({
+          name: `${chat.data().name}: ${chat.id}`,
+          url: `/chats/${chat.id}`
         });
-        this.chats = [...chats];
       });
+      this.chats = [...chats];
     });
   },
   unmounted() {
-    this.unsubscribeAuth();
-    this.unsubscribeFirestore();
+    this.unsubscribe();
+  },
+  methods: {
+    async addChat() {
+      const chat = await addDoc(collection(this.$firestore, 'chats'), {
+        name: 'New chat',
+        users: [{
+          userId: this.userId,
+          accepted: true
+        }],
+        messages: []
+      });
+      alert(`New chat created: ${chat.id}`);
+    }
   }
 };
 </script>

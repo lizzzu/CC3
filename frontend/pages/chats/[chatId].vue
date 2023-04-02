@@ -9,16 +9,9 @@ export default {
     };
   },
   async mounted() {
-    try {
-      const chatRef = doc(useNuxtApp().$firestore, 'chats', this.chatId);
-      const chatDoc = await getDoc(chatRef);
-      if (chatDoc.exists()) {
-        this.chat = chatDoc.data();
-      }
-    }
-    catch (error) {
-      console.error(error)
-    }
+    const chatRef = doc(this.$firestore, 'chats', this.chatId);
+    const chatDoc = await getDoc(chatRef);
+    this.chat = chatDoc.data();
   }
 }
 </script>
