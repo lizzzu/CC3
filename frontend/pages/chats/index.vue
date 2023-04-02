@@ -66,9 +66,9 @@ export default {
     <Title>Chats</Title>
   </Head>
   <h1>Chats</h1>
-  <button @click="logOut">Sign out 🔒</button>
+  <button @click="logOut">Sign out</button>
   <input v-model="newChatName" placeholder="New chat name" />
-  <button @click="addChat" :disabled="newChatName === ''">Create new chat 📝</button>
+  <button @click="addChat" :disabled="newChatName === ''">Create new chat</button>
   <p v-if="chats.length === 0">No chats yet</p>
   <TransitionGroup v-else tag="main">
     <NuxtLink v-for="chat of chats" :to="chat.url" :key="chat.url">{{ chat.name }}</NuxtLink>
