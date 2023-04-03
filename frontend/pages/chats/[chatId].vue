@@ -1,5 +1,5 @@
 <script>
-import { doc, onSnapshot, collection, updateDoc, arrayUnion, Timestamp } from '@firebase/firestore';
+import { doc, updateDoc, collection, arrayUnion, onSnapshot, Timestamp } from '@firebase/firestore';
 
 export default {
   data() {
@@ -7,31 +7,108 @@ export default {
       chatId: this.$route.params.chatId,
       chat: null,
       newMessage: '',
-      newUser: '',
-      unsubscribe: () => { }
+      newUser: null,
+      users: [],
+      unsubscribeChat: () => { },
+      unsubscribeUsers: () => { }
     };
   },
   mounted() {
-    this.unsubscribe = onSnapshot(doc(this.$firestore, 'chats', this.chatId), chatSnapshot => {
+    this.unsubscribeChat = onSnapshot(doc(this.$firestore, 'chats', this.chatId), async chatSnapshot => {
+      if (!chatSnapshot.exists()) {
+        return await navigateTo('/chats');
+      }
       this.chat = chatSnapshot.data();
+      setTimeout(() => this.$refs.main.scrollTop = 1e9, 0);
     });
-    setTimeout(() => this.$refs.main.scrollTop = 1e9, 1000);
+    this.unsubscribeUsers = onSnapshot(collection(this.$firestore, 'users'), usersSnapshot => {
+      const users = [];
+      usersSnapshot.forEach(user => {
+        users.push({
+          id: user.id,
+          username: user.data().username
+        });
+      });
+      this.users = users;
+    });
   },
   unmounted() {
-    this.unsubscribe();
+    this.unsubscribeChat();
+    this.unsubscribeUsers();
+  },
+  computed: {
+    usersNotInChat() {
+      return this.users.filter(user => this.chat.userIds.indexOf(user.id) === -1);
+    }
   },
   methods: {
     async sendMessage() {
-      if (this.newMessage === '') return;
+      const match = this.newMessage.match(/^\$ rename (?<newName>.+)/);
+      if (match != null) {
+        const newName = match.groups.newName;
+        await updateDoc(doc(collection(this.$firestore, 'chats'), this.chatId), {
+          name: newName
+        });
+        await updateDoc(doc(collection(this.$firestore, 'chats'), this.chatId), {
+          messages: arrayUnion({
+            text: `Chat renamed to ${newName}.`,
+            username: '',
+            timestamp: Timestamp.now()
+          })
+        });
+      }
+      else {
+        await updateDoc(doc(collection(this.$firestore, 'chats'), this.chatId), {
+          messages: arrayUnion({
+            text: this.newMessage,
+            username: useCookie('user').value.displayName,
+            timestamp: Timestamp.now()
+          })
+        });
+      }
+      this.newMessage = '';
+    },
+    async addUser() {
       await updateDoc(doc(collection(this.$firestore, 'chats'), this.chatId), {
         messages: arrayUnion({
-          text: this.newMessage,
-          userId: useCookie('user').value.uid,
+          text: `User ${this.newUser.username} ${this.randomJoinMessage()}`,
+          username: '',
           timestamp: Timestamp.now()
         })
       });
-      this.newMessage = '';
-      this.$refs.main.scrollTop = 1e9;
+      await updateDoc(doc(collection(this.$firestore, 'chats'), this.chatId), {
+        userIds: arrayUnion(this.newUser.id)
+      });
+    },
+    randomJoinMessage() {
+      const messages = [
+        'just joined the chat.',
+        'joined the party!',
+        'is here!',
+        'just landed.',
+        'appeared.',
+        'just arrived.',
+        'has spawned in the chat!',
+        'showed up!',
+        'hopped into the server.'
+      ];
+      return messages[Math.floor(Math.random() * messages.length)];
+    },
+    timestampToString(timestamp) {
+      return timestamp.toDate().toLocaleDateString('ro-RO', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    },
+    highlightMentions(message) {
+      return message
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replace(/@\w+/g, match => `<span style="color: gold">${match}</span>`);
     }
   }
 }
@@ -43,40 +120,35 @@ export default {
   </Head>
   <div v-if="chat != null">
     <header>
-      <NuxtLink to="/chats" id="to-chats">← Back to chats</NuxtLink>
+      <NuxtLink to="/chats" class="to-chats">← Back to chats</NuxtLink>
       <h1>{{ chat.name }}</h1>
       <form @submit.prevent>
         <select v-model="newUser">
-          <option value="" disabled>New user</option>
-          <option>gareth618</option>
-          <option>lizzzu</option>
-          <option>gabysk</option>
-          <option>andreea</option>
-          <option>mihai</option>
+          <option :value="null" disabled>New user</option>
+          <option v-for="user of usersNotInChat" :value="user">{{ user.username }}</option>
         </select>
-        <button>Add</button>
+        <button @click="addUser" :disabled="newUser === null">Add</button>
       </form>
     </header>
     <div class="main-wrapper">
       <main ref="main">
-        <div v-for="message in chat.messages" :key="message.id" class="message">
+        <div v-for="message in chat.messages" class="message">
           <div>
-            <p id="user">[{{ message.userId }}]</p>
-            <p id="time">{{ message.timestamp.toDate().toLocaleDateString('ro-RO', {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            }) }}</p>
+            <p class="user">{{ message.username }}</p>
+            <p class="time">{{ timestampToString(message.timestamp) }}</p>
           </div>
-          <p id="text">{{ message.text }}</p>
+          <p :style="{
+            textAlign:
+              message.username === '' ? 'center' :
+              message.username === useCookie('user').value.displayName ? 'right' : 'left',
+            ...(message.username === '' ? { color: '#666' } : { })
+          }" v-html="highlightMentions(message.text)" />
         </div>
       </main>
     </div>
     <form class="new-message" @submit.prevent>
-      <input v-model="newMessage" placeholder="Type..." />
-      <button @click="sendMessage">Send</button>
+      <input v-model.trim="newMessage" placeholder="Type..." />
+      <button @click="sendMessage" :disabled="newMessage === ''">Send</button>
     </form>
   </div>
   <p v-else>Loading...</p>
@@ -87,13 +159,13 @@ header {
   position: relative;
 }
 
-header #to-chats {
+header .to-chats {
   position: absolute;
   top: 0;
   left: 0;
 }
 
-header #to-chats:where(:hover, :focus-visible) {
+header .to-chats:where(:hover, :focus-visible) {
   text-decoration: underline 1px dashed #aaa;
   text-underline-offset: .3em;
 }
@@ -126,22 +198,21 @@ h1 {
 
 .message div {
   display: flex;
-  flex-direction: row;
+  justify-content: space-between;
   gap: .3rem;
   font-size: .75rem;
 }
 
-.message #user {
+.message .user {
   color: #ffa1d5;
 }
 
-.message #time {
+.message .time {
   color: #4affde;
 }
 
 .new-message {
   display: flex;
-  flex-direction: row;
   align-items: center;
   margin-top: .5rem;
   gap: .3rem;

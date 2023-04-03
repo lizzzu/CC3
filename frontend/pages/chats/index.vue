@@ -15,7 +15,7 @@ async function logOut() {
 </script>
 
 <script>
-import { addDoc, collection, query, where, onSnapshot, doc, deleteDoc } from '@firebase/firestore';
+import { doc, addDoc, deleteDoc, collection, query, where, orderBy, onSnapshot } from '@firebase/firestore';
 
 export default {
   data() {
@@ -29,14 +29,14 @@ export default {
   async mounted() {
     this.unsubscribe = onSnapshot(query(
       collection(this.$firestore, 'chats'),
-      where('users', 'array-contains', { userId: this.userId, accepted: true })
+      where('userIds', 'array-contains', this.userId),
+      orderBy('name')
     ), chatsSnapshot => {
       const chats = [];
       chatsSnapshot.forEach(chat => {
         chats.push({
           id: chat.id,
-          name: chat.data().name,
-          url: `/chats/${chat.id}`
+          name: chat.data().name
         });
       });
       this.chats = chats;
@@ -49,16 +49,12 @@ export default {
     async addChat() {
       await addDoc(collection(this.$firestore, 'chats'), {
         name: this.newChatName,
-        users: [{
-          userId: this.userId,
-          accepted: true
-        }],
+        userIds: [this.userId],
         messages: []
       });
       this.newChatName = '';
     },
-    async deleteChat(index) {
-      const chatId = this.chats[index].id;
+    async deleteChat(chatId) {
       if (confirm(`Are you sure you want to delete chat ${chatId}?`)) {
         await deleteDoc(doc(this.$firestore, 'chats', chatId));
       }
@@ -77,16 +73,16 @@ export default {
   </header>
   <p v-if="chats.length === 0">No chats yet</p>
   <TransitionGroup v-else tag="main">
-    <NuxtLink v-for="(chat, index) of chats" :to="chat.url" :key="chat.url" class="chat">
+    <NuxtLink v-for="chat of chats" :to="`/chats/${chat.id}`" :key="chat.id" class="chat">
       <div>
         <span>[{{ chat.id }}]</span>
         {{ chat.name }}
       </div>
-      <button @click="$event.preventDefault(); deleteChat(index)">Delete</button>
+      <button @click="$event.preventDefault(); deleteChat(chat.id)">Delete</button>
     </NuxtLink>
   </TransitionGroup>
   <form class="new-chat" @submit.prevent>
-    <input v-model="newChatName" placeholder="New chat name" />
+    <input v-model.trim="newChatName" placeholder="New chat name" />
     <button @click="addChat" :disabled="newChatName === ''">Create new chat</button>
   </form>
 </template>
@@ -129,7 +125,6 @@ p, a {
 
 a {
   border: 1px solid #ddd;
-  background-color: var(--middground);
   transition-duration: .5s;
   transition-timing-function: ease;
   transition-property: transform, background-color;
@@ -138,7 +133,6 @@ a {
 
 a:where(:hover, :focus-visible) {
   transform: scale(1.03);
-  background-color: var(--bordground);
 }
 
 a:has(+ a:where(:hover, :focus-visible)), a:where(:hover, :focus-visible) + a {
@@ -153,7 +147,6 @@ a:has(+ a + a:where(:hover, :focus-visible)), a:where(:hover, :focus-visible) + 
 
 .new-chat {
   display: flex;
-  flex-direction: row;
   align-items: center;
   margin: 1rem 0 2rem 0;
   gap: .3rem;
