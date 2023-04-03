@@ -4,8 +4,10 @@
 }
 
 html {
+  max-width: 70%;
+  margin: 0 auto;
   line-height: 1.2;
-  font-family: 'Montserrat Alternates', sans-serif;
+  font-family: 'Azeret Mono', monospace;
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
 }

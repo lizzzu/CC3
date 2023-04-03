@@ -34,7 +34,8 @@ export default {
       const chats = [];
       chatsSnapshot.forEach(chat => {
         chats.push({
-          name: `${chat.data().name}: ${chat.id}`,
+          id: chat.id, 
+          name: chat.data().name,
           url: `/chats/${chat.id}`
         });
       });
@@ -65,14 +66,18 @@ export default {
   <Head>
     <Title>Chats</Title>
   </Head>
-  <h1>Chats</h1>
-  <button @click="logOut">Sign out</button>
-  <input v-model="newChatName" placeholder="New chat name" />
-  <button @click="addChat" :disabled="newChatName === ''">Create new chat</button>
+  <div class="header">
+    <button @click="logOut">Sign out</button>
+    <h1>Chats</h1>
+  </div>
   <p v-if="chats.length === 0">No chats yet</p>
   <TransitionGroup v-else tag="main">
-    <NuxtLink v-for="chat of chats" :to="chat.url" :key="chat.url">{{ chat.name }}</NuxtLink>
+    <NuxtLink v-for="chat of chats" :to="chat.url" :key="chat.url">[{{ chat.id }}] {{ chat.name }}</NuxtLink>
   </TransitionGroup>
+  <div class="new-chat">
+    <input v-model="newChatName" placeholder="New chat name" />
+    <button @click="addChat" :disabled="newChatName === ''">Create new chat</button>
+  </div>
 </template>
 
 <style scoped>
@@ -87,16 +92,78 @@ export default {
   transform: translateX(50px);
 }
 
+.header {
+  position: relative;
+}
+
+.header button {
+  position: absolute;
+  right: 0;
+}
+
 h1 {
   margin: 0 auto 2rem auto;
   width: fit-content;
   font-size: 3rem;
+  font-weight: lighter;
   text-align: center;
 }
 
-a {
+p, a {
   display: block;
-  padding: 1rem;
-  font-size: 1.5rem;
+  margin: .5rem 0;
+  padding: .7rem;
+  font-size: 1.3rem;
+}
+
+a {
+  border: 1px solid #ddd;
+  background-color: var(--middground);
+  transition-duration: .5s;
+  transition-timing-function: ease;
+  transition-property: transform, background-color;
+}
+
+a:where(:hover, :focus-visible) {
+  transform: scale(1.03);
+  background-color: var(--bordground);
+}
+
+a:has(+ a:where(:hover, :focus-visible)), a:where(:hover, :focus-visible) + a {
+  transform: scale(1.02);
+  transition-duration: .75s;
+}
+
+a:has(+ a + a:where(:hover, :focus-visible)), a:where(:hover, :focus-visible) + a + a {
+  transform: scale(1.01);
+  transition-duration: 1s;
+}
+
+.new-chat {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 1rem 0 2rem 0;
+  gap: .3rem;
+}
+
+.new-chat input {
+  flex: 1;
+}
+
+@media (max-width: 700px) {
+  p, a {
+    margin: 1rem 0;
+    padding: .5rem;
+    font-size: 1rem;
+  }
+
+  .new-chat {
+    flex-direction: column;
+  }
+
+  .new-chat input {
+    min-width: 100%;
+  }
 }
 </style>

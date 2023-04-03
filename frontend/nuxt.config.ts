@@ -1,4 +1,4 @@
-const fonts = ['Montserrat Alternates', 'Source Code Pro'];
+const fonts = ['Azeret Mono'];
 const encodedFonts = fonts.map(font => 'family=' + font.replaceAll(' ', '+')).join('&');
 
 export default defineNuxtConfig({
