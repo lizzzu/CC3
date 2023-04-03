@@ -15,7 +15,7 @@ async function logOut() {
 </script>
 
 <script>
-import { addDoc, collection, query, where, onSnapshot } from '@firebase/firestore';
+import { addDoc, collection, query, where, onSnapshot, doc, deleteDoc } from '@firebase/firestore';
 
 export default {
   data() {
@@ -56,6 +56,11 @@ export default {
         messages: []
       });
       this.newChatName = '';
+    },
+    async deleteChat(index) {
+      const chat = this.chats[index];
+      await deleteDoc(doc(this.$firestore, 'chats', chat.id));
+      this.chats.splice(index, 1);
     }
   }
 };
@@ -71,7 +76,13 @@ export default {
   </header>
   <p v-if="chats.length === 0">No chats yet</p>
   <TransitionGroup v-else tag="main">
-    <NuxtLink v-for="chat of chats" :to="chat.url" :key="chat.url"><span>[{{ chat.id }}]</span> {{ chat.name }}</NuxtLink>
+    <NuxtLink v-for="(chat, index) of chats" :to="chat.url" :key="chat.url" class="chat">
+      <div>
+        <span>[{{ chat.id }}]</span>
+        {{ chat.name }}
+      </div>
+      <button @click="deleteChat(index)">Delete</button>
+    </NuxtLink>
   </TransitionGroup>
   <form class="new-chat" @submit.prevent>
     <input v-model="newChatName" placeholder="New chat name" />
@@ -151,8 +162,19 @@ a:has(+ a + a:where(:hover, :focus-visible)), a:where(:hover, :focus-visible) + 
   flex: 1;
 }
 
-span {
+.chat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat span {
   color: gold;
+}
+
+.chat button {
+  color: #ffa1d5;
+  border: 1px solid #ffa1d5;
 }
 
 @media (max-width: 700px) {
