@@ -39,7 +39,7 @@ export default {
           url: `/chats/${chat.id}`
         });
       });
-      this.chats = [...chats];
+      this.chats = chats;
     });
   },
   unmounted() {
@@ -58,9 +58,10 @@ export default {
       this.newChatName = '';
     },
     async deleteChat(index) {
-      const chat = this.chats[index];
-      await deleteDoc(doc(this.$firestore, 'chats', chat.id));
-      this.chats.splice(index, 1);
+      const chatId = this.chats[index].id;
+      if (confirm(`Are you sure you want to delete chat ${chatId}?`)) {
+        await deleteDoc(doc(this.$firestore, 'chats', chatId));
+      }
     }
   }
 };
@@ -81,7 +82,7 @@ export default {
         <span>[{{ chat.id }}]</span>
         {{ chat.name }}
       </div>
-      <button @click="deleteChat(index)">Delete</button>
+      <button @click="$event.preventDefault(); deleteChat(index)">Delete</button>
     </NuxtLink>
   </TransitionGroup>
   <form class="new-chat" @submit.prevent>

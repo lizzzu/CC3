@@ -1,1 +1,0 @@
-gcloud functions deploy hello --region='europe-west3' --runtime='nodejs18' --entry-point='hello' --trigger-event=providers/cloud.firestore/eventTypes/document.update --trigger-resource='projects/upheld-garage-381905/databases/(default)/documents/collections/test'
