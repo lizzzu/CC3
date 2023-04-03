@@ -14,17 +14,15 @@ export default {
     this.unsubscribe = onSnapshot(doc(this.$firestore, 'chats', this.chatId), chatSnapshot => {
       this.chat = chatSnapshot.data();
     });
+    setTimeout(() => this.$refs.main.scrollTop = 1e9, 1000);
   },
   unmounted() {
     this.unsubscribe();
   },
   methods: {
     async sendMessage() {
-      if (!this.newMessage) {
-        return;
-      }
-      const chatRef = doc(collection(this.$firestore, 'chats'), this.chatId);
-      await updateDoc(chatRef, {
+      if (this.newMessage === '') return;
+      await updateDoc(doc(collection(this.$firestore, 'chats'), this.chatId), {
         messages: arrayUnion({
           text: this.newMessage,
           userId: useCookie('user').value.uid,
@@ -32,6 +30,7 @@ export default {
         })
       });
       this.newMessage = '';
+      this.$refs.main.scrollTop = 1e9;
     }
   }
 }
@@ -42,43 +41,52 @@ export default {
     <Title>Chats</Title>
   </Head>
   <div v-if="chat != null">
-    <div class="header">
+    <header>
       <NuxtLink to="/chats" id="to-chats">← Back to chats</NuxtLink>
       <h1>{{ chat.name }}</h1>
+    </header>
+    <div class="main-wrapper">
+      <main ref="main">
+        <div v-for="message in chat.messages" :key="message.id" class="message">
+          <div>
+            <p id="user">[{{ message.userId }}]</p>
+            <p id="time">{{ message.timestamp.toDate().toLocaleDateString('ro-RO', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            }) }}</p>
+          </div>
+          <p id="text">{{ message.text }}</p>
+        </div>
+      </main>
     </div>
-    <div v-for="message in chat.messages" :key="message.id" class="message">
-      <div>
-        <p id="user">[{{ message.userId }}]</p>
-        <p id="time">{{ message.timestamp.toDate().toLocaleDateString('ro-RO', {
-          day: '2-digit', 
-          month: '2-digit', 
-          year: 'numeric', 
-          hour: '2-digit', 
-          minute: '2-digit'
-        }) }}</p>
-      </div>
-      <p id="text">{{ message.text }}</p>
-    </div>
-    <div class="new-message">
+    <form class="new-message" @submit.prevent>
       <input v-model="newMessage" placeholder="Type..." />
       <button @click="sendMessage">Send</button>
-    </div>
+    </form>
   </div>
   <p v-else>Loading...</p>
 </template>
 
 <style scoped>
-.header {
+header {
   position: relative;
 }
 
-.header #to-chats {
+header #to-chats {
   position: absolute;
   left: 0;
 }
 
+header #to-chats:where(:hover, :focus-visible) {
+  text-decoration: underline 1px dashed #aaa;
+  text-underline-offset: .3em;
+}
+
 h1 {
-  margin: 0 auto 2rem auto;
+  margin: 0 auto 1rem auto;
   width: fit-content;
   font-size: 3rem;
   font-weight: lighter;
@@ -114,12 +122,50 @@ h1 {
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin: 2rem 0;
+  margin-top: .5rem;
   gap: .3rem;
 }
 
 .new-message input {
   flex: 1;
+}
+
+main {
+  height: 60vh;
+  overflow-y: scroll;
+}
+
+main > :first-child {
+  margin-top: 1rem;
+}
+
+main > :last-child {
+  margin-bottom: 1rem;
+}
+
+.main-wrapper {
+  position: relative;
+  padding: 1px 0;
+}
+
+.main-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1rem;
+  background-image: linear-gradient(to bottom, #222, transparent);
+}
+
+.main-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background-image: linear-gradient(to top, #222, transparent);
 }
 
 @media (max-width: 700px) {

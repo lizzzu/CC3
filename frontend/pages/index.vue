@@ -18,11 +18,19 @@ async function logIn() {
   <Head>
     <Title>Our chat</Title>
   </Head>
-  <h1>Our chat</h1>
-  <button @click="logIn">Sign in</button>
+  <header>
+    <h1>Our chat</h1>
+    <button @click="logIn">Sign in</button>
+  </header>
 </template>
 
 <style scoped>
+header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 h1 {
   margin: 0 auto 2rem auto;
   width: fit-content;

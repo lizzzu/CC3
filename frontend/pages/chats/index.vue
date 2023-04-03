@@ -34,7 +34,7 @@ export default {
       const chats = [];
       chatsSnapshot.forEach(chat => {
         chats.push({
-          id: chat.id, 
+          id: chat.id,
           name: chat.data().name,
           url: `/chats/${chat.id}`
         });
@@ -47,7 +47,7 @@ export default {
   },
   methods: {
     async addChat() {
-      const chat = await addDoc(collection(this.$firestore, 'chats'), {
+      await addDoc(collection(this.$firestore, 'chats'), {
         name: this.newChatName,
         users: [{
           userId: this.userId,
@@ -55,7 +55,6 @@ export default {
         }],
         messages: []
       });
-      alert(`New chat created: ${chat.id}`);
       this.newChatName = '';
     }
   }
@@ -66,18 +65,18 @@ export default {
   <Head>
     <Title>Chats</Title>
   </Head>
-  <div class="header">
+  <header>
     <button @click="logOut">Sign out</button>
     <h1>Chats</h1>
-  </div>
+  </header>
   <p v-if="chats.length === 0">No chats yet</p>
   <TransitionGroup v-else tag="main">
-    <NuxtLink v-for="chat of chats" :to="chat.url" :key="chat.url">[{{ chat.id }}] {{ chat.name }}</NuxtLink>
+    <NuxtLink v-for="chat of chats" :to="chat.url" :key="chat.url"><span>[{{ chat.id }}]</span> {{ chat.name }}</NuxtLink>
   </TransitionGroup>
-  <div class="new-chat">
+  <form class="new-chat" @submit.prevent>
     <input v-model="newChatName" placeholder="New chat name" />
     <button @click="addChat" :disabled="newChatName === ''">Create new chat</button>
-  </div>
+  </form>
 </template>
 
 <style scoped>
@@ -92,11 +91,11 @@ export default {
   transform: translateX(50px);
 }
 
-.header {
+header {
   position: relative;
 }
 
-.header button {
+header button {
   position: absolute;
   right: 0;
 }
@@ -114,6 +113,7 @@ p, a {
   margin: .5rem 0;
   padding: .7rem;
   font-size: 1.3rem;
+  background-color: #222;
 }
 
 a {
@@ -149,6 +149,10 @@ a:has(+ a + a:where(:hover, :focus-visible)), a:where(:hover, :focus-visible) + 
 
 .new-chat input {
   flex: 1;
+}
+
+span {
+  color: gold;
 }
 
 @media (max-width: 700px) {

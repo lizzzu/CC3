@@ -1,6 +1,7 @@
-*, *::before, *::after {
+:where(*, *::before, *::after) {
   outline: none;
   box-sizing: border-box;
+  scroll-behavior: smooth;
 }
 
 html {
@@ -19,7 +20,7 @@ body {
   background-color: #222;
 }
 
-p, h1, h2, h3, h4, h5, h6 {
+:where(p, h1, h2, h3, h4, h5, h6) {
   margin: 0;
 }
 
@@ -28,7 +29,7 @@ p, h1, h2, h3, h4, h5, h6 {
   height: 1em;
 }
 
-button, select, input {
+:where(button, select, input) {
   display: block;
   padding: .5rem;
   color: inherit;
@@ -43,8 +44,8 @@ button, select, input {
   opacity: .5;
 }
 
-:where(button, select, input):where(:hover, :focus-visible) {
-  background-color: #666;
+:where(button, select):where(:hover, :focus-visible) {
+  background-color: #555;
 }
 
 button {
