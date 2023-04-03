@@ -7,6 +7,7 @@ export default {
       chatId: this.$route.params.chatId,
       chat: null,
       newMessage: '',
+      newUser: '',
       unsubscribe: () => { }
     };
   },
@@ -44,6 +45,17 @@ export default {
     <header>
       <NuxtLink to="/chats" id="to-chats">← Back to chats</NuxtLink>
       <h1>{{ chat.name }}</h1>
+      <form @submit.prevent>
+        <select v-model="newUser">
+          <option value="" disabled>New user</option>
+          <option>gareth618</option>
+          <option>lizzzu</option>
+          <option>gabysk</option>
+          <option>andreea</option>
+          <option>mihai</option>
+        </select>
+        <button>Add</button>
+      </form>
     </header>
     <div class="main-wrapper">
       <main ref="main">
@@ -77,12 +89,21 @@ header {
 
 header #to-chats {
   position: absolute;
+  top: 0;
   left: 0;
 }
 
 header #to-chats:where(:hover, :focus-visible) {
   text-decoration: underline 1px dashed #aaa;
   text-underline-offset: .3em;
+}
+
+header form {
+  display: flex;
+  gap: .25rem;
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 
 h1 {
@@ -131,8 +152,17 @@ h1 {
 }
 
 main {
-  height: 60vh;
+  height: 70vh;
   overflow-y: scroll;
+  padding-right: .25rem;
+}
+
+main::-webkit-scrollbar {
+  width: .5rem;
+}
+
+main::-webkit-scrollbar-thumb {
+  background-color: #444;
 }
 
 main > :first-child {

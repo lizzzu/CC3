@@ -113,7 +113,6 @@ p, a {
   margin: .5rem 0;
   padding: .7rem;
   font-size: 1.3rem;
-  background-color: #222;
 }
 
 a {
@@ -122,6 +121,7 @@ a {
   transition-duration: .5s;
   transition-timing-function: ease;
   transition-property: transform, background-color;
+  background-color: #222;
 }
 
 a:where(:hover, :focus-visible) {
