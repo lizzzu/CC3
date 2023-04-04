@@ -1,20 +1,5 @@
-<script setup>
-import { signOut } from 'firebase/auth';
-
-async function logOut() {
-  try {
-    await signOut(useNuxtApp().$auth);
-    useCookie('user').value = null;
-    await navigateTo('/');
-  }
-  catch (error) {
-    console.error(error);
-    alert(error.message);
-  }
-};
-</script>
-
 <script>
+import { signOut } from 'firebase/auth';
 import { doc, addDoc, deleteDoc, collection, query, where, orderBy, onSnapshot } from '@firebase/firestore';
 
 export default {
@@ -46,6 +31,17 @@ export default {
     this.unsubscribe();
   },
   methods: {
+    async logOut() {
+      try {
+        await signOut(this.$auth);
+        useCookie('user').value = null;
+        await navigateTo('/');
+      }
+      catch (error) {
+        console.error(error);
+        alert(error.message);
+      }
+    },
     async addChat() {
       await addDoc(collection(this.$firestore, 'chats'), {
         name: this.newChatName,
