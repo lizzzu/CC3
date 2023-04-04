@@ -1,7 +1,7 @@
 <script>
 import twemoji from 'twemoji';
 import { getToken } from 'firebase/messaging';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, collection } from 'firebase/firestore';
 
 export default {
   data() {
@@ -12,7 +12,9 @@ export default {
   async mounted() {
     this.twemojify();
     this.interval = setInterval(this.twemojify, 1000);
-    await this.notifyUser();
+    if (useCookie('user') != null) {
+      await this.fcmAccess();
+    }
   },
   unmounted() {
     clearInterval(this.interval);
@@ -24,23 +26,18 @@ export default {
         ext: '.svg'
       });
     },
-    async notifyUser() {
+    async fcmAccess() {
       try {
-        const token = await getToken(this.$messaging, { 
-            vapidKey: 'BOWkO9MiCaIgLeFhf8j9VnmqfKHHG8TVh5mrIIhZFAKImscr-TA1uc0OhSETZm6XS5sC-liSHPgpqqqayOb266s' 
+        const token = await getToken(this.$messaging, {
+          vapidKey: 'BOWkO9MiCaIgLeFhf8j9VnmqfKHHG8TVh5mrIIhZFAKImscr-TA1uc0OhSETZm6XS5sC-liSHPgpqqqayOb266s'
         });
-        if (token) {
-          await updateDoc(doc(this.$firestore, 'users', useCookie('user').uid), {
-            fcmToken: token
-          });
-        }
-        else {
-          console.log('No registration token available. Request permission to generate one.');
-        }
+        await updateDoc(doc(collection(this.$firestore, 'users'), useCookie('user').value.uid), {
+          fcmToken: token
+        });
       }
-      catch(error) {
+      catch (error) {
         console.error(error);
-      };
+      }
     }
   }
 };

@@ -224,6 +224,7 @@ h1 {
 
 main {
   height: 70vh;
+  overflow-x: hidden;
   overflow-y: scroll;
   padding-right: .25rem;
 }
