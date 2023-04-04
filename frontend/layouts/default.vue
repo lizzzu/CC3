@@ -12,7 +12,7 @@ export default {
   async mounted() {
     this.twemojify();
     this.interval = setInterval(this.twemojify, 1000);
-    if (useCookie('user') != null) {
+    if (useCookie('user')?.value != null) {
       await this.fcmAccess();
     }
   },
@@ -29,7 +29,7 @@ export default {
     async fcmAccess() {
       try {
         const token = await getToken(this.$messaging, {
-          vapidKey: 'BOWkO9MiCaIgLeFhf8j9VnmqfKHHG8TVh5mrIIhZFAKImscr-TA1uc0OhSETZm6XS5sC-liSHPgpqqqayOb266s'
+          vapidKey: 'BE-Q2JjRYQJGQ8xIXtDv35i0dnnCXHZx9SF2h1o5yeHOzJ-4QXH5VUpg5P7C7ANgAeY-kUOq40SjPHrpz3Zb_5g'
         });
         await updateDoc(doc(collection(this.$firestore, 'users'), useCookie('user').value.uid), {
           fcmToken: token
