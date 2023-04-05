@@ -1,5 +1,9 @@
 {
+  "engines": {
+    "node": "18.x"
+  },
   "scripts": {
+    "start": "nuxt build && node .output/server/index.mjs",
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
