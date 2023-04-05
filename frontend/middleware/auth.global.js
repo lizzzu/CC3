@@ -1,7 +1,7 @@
 import { doc, getDoc } from '@firebase/firestore';
 
 export default defineNuxtRouteMiddleware(async to => {
-  const user = useCookie('user').value;
+  const user = useCookie('user', { sameSite: 'none', secure: true }).value;
   if (!user && to.path.startsWith('/chats')) {
     return navigateTo('/');
   }

@@ -6,7 +6,7 @@ export default {
     async logIn() {
       try {
         const { user } = await signInWithPopup(this.$auth, new GoogleAuthProvider());
-        useCookie('user').value = user;
+        useCookie('user', { sameSite: 'none', secure: true }).value = user;
         await navigateTo('/chats');
       }
       catch (error) {

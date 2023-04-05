@@ -5,7 +5,7 @@ import { doc, addDoc, deleteDoc, collection, query, where, orderBy, onSnapshot }
 export default {
   data() {
     return {
-      userId: useCookie('user').value.uid,
+      userId: useCookie('user', { sameSite: 'none', secure: true }).value.uid,
       chats: [],
       newChatName: '',
       unsubscribe: () => { }
@@ -34,7 +34,7 @@ export default {
     async logOut() {
       try {
         await signOut(this.$auth);
-        useCookie('user').value = null;
+        useCookie('user', { sameSite: 'none', secure: true }).value = null;
         await navigateTo('/');
       }
       catch (error) {

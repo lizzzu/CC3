@@ -61,7 +61,7 @@ export default {
         await updateDoc(doc(collection(this.$firestore, 'chats'), this.chatId), {
           messages: arrayUnion({
             text: this.newMessage,
-            username: useCookie('user').value.displayName,
+            username: useCookie('user', { sameSite: 'none', secure: true }).value.displayName,
             timestamp: Timestamp.now()
           })
         });
@@ -140,7 +140,7 @@ export default {
           <p :style="{
             textAlign:
               message.username === '' ? 'center' :
-              message.username === useCookie('user').value.displayName ? 'right' : 'left',
+              message.username === useCookie('user', { sameSite: 'none', secure: true }).value.displayName ? 'right' : 'left',
             ...(message.username === '' ? { color: '#666' } : { })
           }" v-html="highlightMentions(message.text)" />
         </div>

@@ -16,10 +16,11 @@ export const notifyUser = functions.firestore.document('chats/{chatId}').onUpdat
   if (newChat.userIds.length === oldChat.userIds.length + 1) {
     const userId = newChat.userIds.at(-1);
     const { fcmToken } = (await admin.firestore().collection('users').doc(userId).get()).data();
+    const { name } = (await admin.firestore().collection('chats').doc(chatId).get()).data();
     admin.messaging().sendToDevice(fcmToken, {
-      notification: {
-        title: `You have been added to chat ${chatId}!`,
-        body: `You have been added to chat ${chatId}!`
+      data: {
+        chatId,
+        chatName: name
       }
     });
   }
