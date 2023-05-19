@@ -28,11 +28,5 @@ export default defineNuxtConfig({
   },
   css: [
     '@/assets/css/global.css'
-  ],
-  runtimeConfig: {
-    public: {
-      sasToken: process.env.AZURE_STORAGE_SAS_TOKEN,
-      storageAccountName: process.env.AZURE_STORAGE_RESOURCE_NAME
-    }
-  }
+  ]
 })

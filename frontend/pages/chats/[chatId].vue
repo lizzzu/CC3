@@ -1,6 +1,5 @@
 <script setup>
 import { doc, updateDoc, collection, arrayUnion, Timestamp } from '@firebase/firestore'
-import { BlobServiceClient } from '@azure/storage-blob'
 
 const { chatId } = useRoute().params
 const { $firestore } = useNuxtApp()
@@ -83,13 +82,7 @@ const containerName = 'photos'
 const uploadUrl = `https://${storageAccountName}.blob.core.windows.net/?${sasToken}`
 
 async function uploadPhoto(photo) {
-  const blobService = new BlobServiceClient(uploadUrl)
-  const containerClient = blobService.getContainerClient(containerName)
-
-  const blobClient = containerClient.getBlockBlobClient(photo.name)
-  const options = { blobHTTPHeaders: { blobContentType: photo.type } }
-
-  await blobClient.uploadData(photo, options)
+  // TODO
 }
 </script>
 
