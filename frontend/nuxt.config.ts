@@ -1,5 +1,5 @@
-const fonts = ['Azeret Mono'];
-const encodedFonts = fonts.map(font => 'family=' + font.replaceAll(' ', '+')).join('&');
+const fonts = ['Azeret Mono']
+const encodedFonts = fonts.map(font => 'family=' + font.replaceAll(' ', '+')).join('&')
 
 export default defineNuxtConfig({
   app: {
@@ -28,5 +28,11 @@ export default defineNuxtConfig({
   },
   css: [
     '@/assets/css/global.css'
-  ]
-});
+  ],
+  runtimeConfig: {
+    public: {
+      sasToken: process.env.AZURE_STORAGE_SAS_TOKEN,
+      storageAccountName: process.env.AZURE_STORAGE_RESOURCE_NAME
+    }
+  }
+})

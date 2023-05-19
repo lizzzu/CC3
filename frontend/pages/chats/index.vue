@@ -1,62 +1,55 @@
-<script>
-import { signOut } from 'firebase/auth';
-import { doc, addDoc, deleteDoc, collection, query, where, orderBy, onSnapshot } from '@firebase/firestore';
+<script setup>
+import { signOut } from 'firebase/auth'
+import { doc, addDoc, deleteDoc, collection, query, where, orderBy } from '@firebase/firestore'
 
-export default {
-  data() {
-    return {
-      userId: useCookie('user', { sameSite: 'none', secure: true }).value.uid,
-      chats: [],
-      newChatName: '',
-      unsubscribe: () => { }
-    };
-  },
-  async mounted() {
-    this.unsubscribe = onSnapshot(query(
-      collection(this.$firestore, 'chats'),
-      where('userIds', 'array-contains', this.userId),
-      orderBy('name')
-    ), chatsSnapshot => {
-      const chats = [];
-      chatsSnapshot.forEach(chat => {
-        chats.push({
-          id: chat.id,
-          name: chat.data().name
-        });
-      });
-      this.chats = chats;
-    });
-  },
-  unmounted() {
-    this.unsubscribe();
-  },
-  methods: {
-    async logOut() {
-      try {
-        await signOut(this.$auth);
-        useCookie('user', { sameSite: 'none', secure: true }).value = null;
-        await navigateTo('/');
-      }
-      catch (error) {
-        console.error(error);
-        alert(error.message);
-      }
-    },
-    async addChat() {
-      await addDoc(collection(this.$firestore, 'chats'), {
-        name: this.newChatName,
-        userIds: [this.userId],
-        messages: []
-      });
-      this.newChatName = '';
-    },
-    async deleteChat(chatId) {
-      if (confirm(`Are you sure you want to delete chat ${chatId}?`)) {
-        await deleteDoc(doc(this.$firestore, 'chats', chatId));
-      }
-    }
+const { $auth, $firestore } = useNuxtApp()
+const authUser = useFirebaseAuth()
+
+async function logOut() {
+  try {
+    await signOut($auth)
+    authUser.value = null
+    await navigateTo('/')
   }
-};
+  catch (error) {
+    console.error(error)
+    alert(error.message)
+  }
+}
+
+const chats = ref([])
+
+useSnapshot(query(
+  collection($firestore, 'chats'),
+  where('userIds', 'array-contains', authUser.value.uid),
+  orderBy('name')
+), chatsSnapshot => {
+  const chatDocs = []
+  chatsSnapshot.forEach(chat => {
+    chatDocs.push({
+      id: chat.id,
+      name: chat.data().name
+    })
+  })
+  chats.value = chatDocs
+})
+
+const newChatName = ref('')
+
+async function addChat() {
+  await addDoc(collection($firestore, 'chats'), {
+    name: newChatName.value,
+    userIds: [authUser.value.uid],
+    messages: []
+  })
+  newChatName.value = ''
+}
+
+async function deleteChat(chatId) {
+  if (confirm(`Are you sure you want to delete chat ${chatId}?`)) {
+    await deleteDoc(doc($firestore, 'chats', chatId))
+  }
+}
 </script>
 
 <template>

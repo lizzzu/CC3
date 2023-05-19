@@ -29,7 +29,7 @@ body {
   height: 1em;
 }
 
-:where(button, select, input) {
+:where(button, select, input, label) {
   display: block;
   padding: .5rem;
   color: inherit;
@@ -44,7 +44,7 @@ body {
   opacity: .5;
 }
 
-:where(button, select):where(:hover, :focus-visible) {
+:where(button, select, label):where(:hover, :focus-visible) {
   background-color: #555;
 }
 

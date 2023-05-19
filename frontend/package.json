@@ -1,9 +1,5 @@
 {
-  "engines": {
-    "node": "18.x"
-  },
   "scripts": {
-    "start": "nuxt build && node .output/server/index.mjs",
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
@@ -11,9 +7,10 @@
     "postinstall": "nuxt prepare"
   },
   "devDependencies": {
-    "nuxt": "^3.3.2"
+    "nuxt": "^3.4.3"
   },
   "dependencies": {
+    "@azure/storage-blob": "^12.14.0",
     "firebase": "^9.0.1",
     "twemoji": "^14.0.2"
   }

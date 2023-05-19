@@ -5,4 +5,4 @@ export default {
   storageBucket: 'upheld-garage-381905.appspot.com',
   messagingSenderId: '933668001119',
   appId: '1:933668001119:web:b2690d1cbf8b8874db92ea'
-};
+}

@@ -1,21 +1,20 @@
-<script>
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+<script setup>
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
 
-export default {
-  methods: {
-    async logIn() {
-      try {
-        const { user } = await signInWithPopup(this.$auth, new GoogleAuthProvider());
-        useCookie('user', { sameSite: 'none', secure: true }).value = user;
-        await navigateTo('/chats');
-      }
-      catch (error) {
-        console.error(error);
-        alert(error.message);
-      }
-    }
+const { $auth } = useNuxtApp()
+const authUser = useFirebaseAuth()
+
+async function logIn() {
+  try {
+    const { user } = await signInWithPopup($auth, new GoogleAuthProvider())
+    authUser.value = user
+    await navigateTo('/chats')
   }
-};
+  catch (error) {
+    console.error(error)
+    alert(error.message)
+  }
+}
 </script>
 
 <template>

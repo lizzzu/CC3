@@ -1,116 +1,95 @@
-<script>
-import { doc, updateDoc, collection, arrayUnion, onSnapshot, Timestamp } from '@firebase/firestore';
+<script setup>
+import { doc, updateDoc, collection, arrayUnion, Timestamp } from '@firebase/firestore'
+import { BlobServiceClient } from '@azure/storage-blob'
 
-export default {
-  data() {
-    return {
-      chatId: this.$route.params.chatId,
-      chat: null,
-      newMessage: '',
-      newUser: null,
-      users: [],
-      unsubscribeChat: () => { },
-      unsubscribeUsers: () => { }
-    };
-  },
-  mounted() {
-    this.unsubscribeChat = onSnapshot(doc(this.$firestore, 'chats', this.chatId), async chatSnapshot => {
-      if (!chatSnapshot.exists()) {
-        return await navigateTo('/chats');
-      }
-      this.chat = chatSnapshot.data();
-      setTimeout(() => this.$refs.main.scrollTop = 1e9, 0);
-    });
-    this.unsubscribeUsers = onSnapshot(collection(this.$firestore, 'users'), usersSnapshot => {
-      const users = [];
-      usersSnapshot.forEach(user => {
-        users.push({
-          id: user.id,
-          username: user.data().username
-        });
-      });
-      this.users = users;
-    });
-  },
-  unmounted() {
-    this.unsubscribeChat();
-    this.unsubscribeUsers();
-  },
-  computed: {
-    usersNotInChat() {
-      return this.users.filter(user => this.chat.userIds.indexOf(user.id) === -1);
-    }
-  },
-  methods: {
-    async sendMessage() {
-      const match = this.newMessage.match(/^\$ rename (?<newName>.+)/);
-      if (match != null) {
-        const newName = match.groups.newName;
-        await updateDoc(doc(collection(this.$firestore, 'chats'), this.chatId), {
-          name: newName
-        });
-        await updateDoc(doc(collection(this.$firestore, 'chats'), this.chatId), {
-          messages: arrayUnion({
-            text: `Chat renamed to ${newName}.`,
-            username: '',
-            timestamp: Timestamp.now()
-          })
-        });
-      }
-      else {
-        await updateDoc(doc(collection(this.$firestore, 'chats'), this.chatId), {
-          messages: arrayUnion({
-            text: this.newMessage,
-            username: useCookie('user', { sameSite: 'none', secure: true }).value.displayName,
-            timestamp: Timestamp.now()
-          })
-        });
-      }
-      this.newMessage = '';
-    },
-    async addUser() {
-      await updateDoc(doc(collection(this.$firestore, 'chats'), this.chatId), {
-        messages: arrayUnion({
-          text: `User ${this.newUser.username} ${this.randomJoinMessage()}`,
-          username: '',
-          timestamp: Timestamp.now()
-        })
-      });
-      await updateDoc(doc(collection(this.$firestore, 'chats'), this.chatId), {
-        userIds: arrayUnion(this.newUser.id)
-      });
-    },
-    randomJoinMessage() {
-      const messages = [
-        'just joined the chat.',
-        'joined the party!',
-        'is here!',
-        'just landed.',
-        'appeared.',
-        'just arrived.',
-        'has spawned in the chat!',
-        'showed up!',
-        'hopped into the server.'
-      ];
-      return messages[Math.floor(Math.random() * messages.length)];
-    },
-    timestampToString(timestamp) {
-      return timestamp.toDate().toLocaleDateString('ro-RO', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    },
-    highlightMentions(message) {
-      return message
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replace(/@\w+/g, match => `<span style="color: gold">${match}</span>`);
-    }
+const { chatId } = useRoute().params
+const { $firestore } = useNuxtApp()
+const authUser = useFirebaseAuth()
+
+const chat = ref(null)
+const main = ref(null)
+
+useSnapshot(doc($firestore, 'chats', chatId), async chatSnapshot => {
+  if (!chatSnapshot.exists()) {
+    return await navigateTo('/chats')
   }
+  chat.value = chatSnapshot.data()
+  setTimeout(() => main.value.scrollTop = 1e9, 0)
+})
+
+const users = ref([])
+
+useSnapshot(collection($firestore, 'users'), usersSnapshot => {
+  const userDocs = []
+  usersSnapshot.forEach(user => {
+    userDocs.push({
+      id: user.id,
+      username: user.data().username
+    })
+  })
+  users.value = userDocs
+})
+
+const usersNotInChat = computed(() => {
+  return users.value.filter(user => chat.value.userIds.indexOf(user.id) === -1)
+})
+
+const newMessage = ref('')
+
+async function sendMessage() {
+  const match = newMessage.value.match(/^\$ rename (?<newName>.+)/)
+  if (match != null) {
+    const newName = match.groups.newName
+    await updateDoc(doc(collection($firestore, 'chats'), chatId), {
+      name: newName
+    })
+    await updateDoc(doc(collection($firestore, 'chats'), chatId), {
+      messages: arrayUnion({
+        text: `Chat renamed to ${newName}.`,
+        username: '',
+        timestamp: Timestamp.now()
+      })
+    })
+  }
+  else {
+    await updateDoc(doc(collection($firestore, 'chats'), chatId), {
+      messages: arrayUnion({
+        text: newMessage.value,
+        username: authUser.value.displayName,
+        timestamp: Timestamp.now()
+      })
+    })
+  }
+  newMessage.value = ''
+}
+
+const newUser = ref(null)
+
+async function addUser() {
+  await updateDoc(doc(collection($firestore, 'chats'), chatId), {
+    messages: arrayUnion({
+      text: `User ${newUser.value.username} ${randomJoinMessage()}`,
+      username: '',
+      timestamp: Timestamp.now()
+    })
+  })
+  await updateDoc(doc(collection($firestore, 'chats'), chatId), {
+    userIds: arrayUnion(newUser.value.id)
+  })
+}
+
+const { sasToken, storageAccountName } = useRuntimeConfig().public
+const containerName = 'photos'
+const uploadUrl = `https://${storageAccountName}.blob.core.windows.net/?${sasToken}`
+
+async function uploadPhoto(photo) {
+  const blobService = new BlobServiceClient(uploadUrl)
+  const containerClient = blobService.getContainerClient(containerName)
+
+  const blobClient = containerClient.getBlockBlobClient(photo.name)
+  const options = { blobHTTPHeaders: { blobContentType: photo.type } }
+
+  await blobClient.uploadData(photo, options)
 }
 </script>
 
@@ -140,13 +119,14 @@ export default {
           <p :style="{
             textAlign:
               message.username === '' ? 'center' :
-              message.username === useCookie('user', { sameSite: 'none', secure: true }).value.displayName ? 'right' : 'left',
+              message.username === authUser.displayName ? 'right' : 'left',
             ...(message.username === '' ? { color: '#666' } : { })
           }" v-html="highlightMentions(message.text)" />
         </div>
       </main>
     </div>
     <form class="new-message" @submit.prevent>
+      <FileInput @upload="uploadPhoto">Send photo</FileInput>
       <input v-model.trim="newMessage" placeholder="Type..." />
       <button @click="sendMessage" :disabled="newMessage === ''">Send</button>
     </form>
