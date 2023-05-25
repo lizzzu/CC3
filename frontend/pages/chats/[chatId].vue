@@ -77,10 +77,6 @@ async function addUser() {
   })
 }
 
-const { sasToken, storageAccountName } = useRuntimeConfig().public
-const containerName = 'photos'
-const uploadUrl = `https://${storageAccountName}.blob.core.windows.net/?${sasToken}`
-
 async function uploadPhoto(photo) {
   // TODO
 }
