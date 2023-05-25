@@ -11,10 +11,12 @@
     "postinstall": "nuxt prepare"
   },
   "devDependencies": {
+    "@types/katex": "^0.16.0",
     "nuxt": "^3.4.3"
   },
   "dependencies": {
     "firebase": "^9.0.1",
+    "katex": "^0.16.7",
     "twemoji": "^14.0.2"
   }
 }

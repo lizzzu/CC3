@@ -1,5 +1,6 @@
 <script setup>
-import { doc, updateDoc, collection, arrayUnion, Timestamp } from '@firebase/firestore'
+import { watch } from 'vue'
+import { doc, updateDoc, collection, arrayUnion, Timestamp, increment } from '@firebase/firestore'
 
 const { chatId } = useRoute().params
 const { $firestore } = useNuxtApp()
@@ -16,6 +17,26 @@ useSnapshot(doc($firestore, 'chats', chatId), async chatSnapshot => {
   setTimeout(() => main.value.scrollTop = 1e9, 0)
 })
 
+const typing = ref(false)
+
+watch(typing, async newTyping => {
+  await updateDoc(doc($firestore, 'chats', chatId), {
+    typingCount: increment(newTyping ? +1 : -1)
+  })
+})
+
+const messages = computed(() => {
+  const messages = [...chat.value.messages]
+  if (chat.value.typingCount > 1 || chat.value.typingCount === 1 && !typing.value) {
+    messages.push({
+      text: 'Somebody is typing...',
+      username: '$',
+      timestamp: Timestamp.now()
+    })
+  }
+  return messages
+})
+
 const users = ref([])
 
 useSnapshot(collection($firestore, 'users'), usersSnapshot => {
@@ -29,16 +50,28 @@ useSnapshot(collection($firestore, 'users'), usersSnapshot => {
   users.value = userDocs
 })
 
+const usernamesInChat = computed(() => {
+  return users.value.filter(user => chat.value.userIds.includes(user.id)).map(user => user.username)
+})
+
 const usersNotInChat = computed(() => {
-  return users.value.filter(user => chat.value.userIds.indexOf(user.id) === -1)
+  return users.value.filter(user => !chat.value.userIds.includes(user.id))
 })
 
 const newMessage = ref('')
 
+function tryMention(event) {
+  const tag = newMessage.value.match(/@(?<tag>.*)$/)?.groups.tag
+  if (tag == null) return
+  const validUsernames = usernamesInChat.value.filter(username => username.toLowerCase().startsWith(tag.toLowerCase()))
+  if (validUsernames.length !== 1) return
+  event.preventDefault()
+  newMessage.value = newMessage.value.slice(0, -tag.length) + validUsernames[0]
+}
+
 async function sendMessage() {
-  const match = newMessage.value.match(/^\$ rename (?<newName>.+)/)
-  if (match != null) {
-    const newName = match.groups.newName
+  const newName = newMessage.value.match(/^\$ rename (?<newName>.+)/)?.groups.newName
+  if (newName != null) {
     await updateDoc(doc(collection($firestore, 'chats'), chatId), {
       name: newName
     })
@@ -100,8 +133,8 @@ async function uploadPhoto(photo) {
     </header>
     <div class="main-wrapper">
       <main ref="main">
-        <div v-for="message in chat.messages" class="message">
-          <div>
+        <div v-for="(message, index) in messages" class="message">
+          <div v-if="message.username !== '$'" :class="{ special: index > 0 && message.username === messages[index - 1].username && message.timestamp - messages[index - 1].timestamp < 5 }">
             <p class="user">{{ message.username }}</p>
             <p class="time">{{ timestampToString(message.timestamp) }}</p>
           </div>
@@ -110,13 +143,13 @@ async function uploadPhoto(photo) {
               message.username === '' ? 'center' :
               message.username === authUser.displayName ? 'right' : 'left',
             ...(message.username === '' ? { color: '#666' } : { })
-          }" v-html="highlightMentions(message.text)" />
+          }" v-html="compileMessage(message.text, usernamesInChat)" />
         </div>
       </main>
     </div>
     <form class="new-message" @submit.prevent>
       <FileInput @upload="uploadPhoto">Send photo</FileInput>
-      <input v-model.trim="newMessage" placeholder="Type..." />
+      <input v-model.trim="newMessage" @keydown.tab="tryMention" placeholder="Type..." @focusin="typing = true" @focusout="typing = false" />
       <button @click="sendMessage" :disabled="newMessage === ''">Send</button>
     </form>
   </div>
@@ -162,7 +195,7 @@ h1 {
   margin: .3rem 0;
   border: .1rem;
   gap: .3rem;
-  border: 1px solid #ddd;
+  background-color: #2c2c2c;
 }
 
 .message div {
@@ -178,6 +211,14 @@ h1 {
 
 .message .time {
   color: #4affde;
+}
+
+.message .special {
+  display: none;
+}
+
+.message:has(.special) {
+  margin-top: -1.5rem;
 }
 
 .new-message {
@@ -203,7 +244,7 @@ main::-webkit-scrollbar {
 }
 
 main::-webkit-scrollbar-thumb {
-  background-color: #444;
+  background-color: #2c2c2c;
 }
 
 main > :first-child {
@@ -215,6 +256,7 @@ main > :last-child {
 }
 
 .main-wrapper {
+  overflow: hidden;
   position: relative;
   padding: 1px 0;
 }

@@ -15,7 +15,7 @@ export default defineNuxtRouteMiddleware(async to => {
       const chatId = to.path.slice('/chats/'.length)
       if (chatId === '') return
       const chatDoc = await getDoc(doc(nuxtApp.$firestore, 'chats', chatId))
-      if (!chatDoc.exists() || chatDoc.data().userIds.indexOf(userId) === -1) {
+      if (!chatDoc.exists() || !chatDoc.data().userIds.includes(userId)) {
         return createError({ statusCode: 404 })
       }
     }

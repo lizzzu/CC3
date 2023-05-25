@@ -28,10 +28,24 @@ useSnapshot(query(
   chatsSnapshot.forEach(chat => {
     chatDocs.push({
       id: chat.id,
-      name: chat.data().name
+      name: chat.data().name,
+      userIds: chat.data().userIds
     })
   })
   chats.value = chatDocs
+})
+
+const users = ref([])
+
+useSnapshot(collection($firestore, 'users'), usersSnapshot => {
+  const userDocs = []
+  usersSnapshot.forEach(user => {
+    userDocs.push({
+      id: user.id,
+      username: user.data().username
+    })
+  })
+  users.value = userDocs
 })
 
 const newChatName = ref('')
@@ -40,7 +54,8 @@ async function addChat() {
   await addDoc(collection($firestore, 'chats'), {
     name: newChatName.value,
     userIds: [authUser.value.uid],
-    messages: []
+    messages: [],
+    typingCount: 0
   })
   newChatName.value = ''
 }
@@ -64,8 +79,8 @@ async function deleteChat(chatId) {
   <TransitionGroup v-else tag="main">
     <NuxtLink v-for="chat of chats" :to="`/chats/${chat.id}`" :key="chat.id" class="chat">
       <div>
-        <span>[{{ chat.id }}]</span>
-        {{ chat.name }}
+        <span>{{ chat.name }}</span>&nbsp;
+        <span>{{ users.filter(user => user.id !== authUser.uid && chat.userIds.includes(user.id)).map(user => user.username).join(', ') }}</span>
       </div>
       <button @click="$event.preventDefault(); deleteChat(chat.id)">Delete</button>
     </NuxtLink>
@@ -113,11 +128,11 @@ p, a {
 }
 
 a {
+  background-color: #2c2c2c;
   border: 1px solid #ddd;
   transition-duration: .5s;
   transition-timing-function: ease;
   transition-property: transform, background-color;
-  background-color: #222;
 }
 
 a:where(:hover, :focus-visible) {
@@ -151,9 +166,17 @@ a:has(+ a + a:where(:hover, :focus-visible)), a:where(:hover, :focus-visible) + 
   align-items: center;
 }
 
-.chat span {
+.chat div span:first-child {
   color: gold;
 }
+
+.chat div span:last-child {
+  font-size: .5em;
+}
+
+/* .chat:not(:hover) div span:last-child {
+  display: none;
+} */
 
 .chat button {
   color: #ffa1d5;

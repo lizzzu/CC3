@@ -2,16 +2,16 @@
 
 Eu vreau să mai fac din chestiile mărunte în primul rând:
 
-- [ ] user is typing
-- [ ] edit message on double click
-- [ ] better twemoji (without replacing)
-- [ ] alphanumeric usernames (for better tags)
-- [ ] tag only users in chat
-- [ ] inline markdown - `http(s)://` links
-- [ ] inline markdown - latex `$`
-- [ ] de scos id-ul din caseta cu chatul
-- [ ] background la casetele cu mesaje diferit de backgroundul paginii
-- [ ] change favicon
+- [x] user is typing
+- [x] de combinat mesaje
+- [x] tag numai la userii din chat
+- [x] tag prin tab
+- [x] inline markdown: `http(s)://` links
+- [x] inline markdown: latex `$`
+- [x] de afișat userii dintr-un chat
+- [x] de scos id-ul din caseta cu chatul
+- [x] background la casetele cu mesaje diferit de backgroundul paginii
+- [x] de schimbat faviconul
 
 ## 📸 Poze
 

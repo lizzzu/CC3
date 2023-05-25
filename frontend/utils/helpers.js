@@ -1,3 +1,5 @@
+import katex from 'katex'
+
 export function randomJoinMessage() {
   const messages = [
     'just joined the chat.',
@@ -23,10 +25,15 @@ export function timestampToString(timestamp) {
   })
 }
 
-export function highlightMentions(message) {
+export function compileMessage(message, usernames) {
   return message
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
-    .replace(/@\w+/g, match => `<span style="color: gold">${match}</span>`)
+    .replace(/\$.+\$/g, match => katex.renderToString(match.slice(1, -1)))
+    .replace(/https?:\/\/\S+/g, match => `<a href="${match}" target="_blank" style="color: cornflowerblue">${match.slice(0, 100) + (match.length > 100 ? '...' : '')}</a>`)
+    .replace(
+      new RegExp('@(' + usernames.join('|') + ')', 'g'),
+      match => `<span style="color: gold">${match}</span>`
+    )
 }
