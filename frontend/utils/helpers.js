@@ -32,7 +32,10 @@ export function compileText(text, usernames) {
       .replaceAll('&', '&amp;')
       .replaceAll('<', '&lt;')
       .replaceAll('>', '&gt;')
-      .replace(/\$.+\$/g, match => katex.renderToString(match.slice(1, -1)))
+      .replace(/\$.+?\$/g, match => {
+        try { return katex.renderToString(match.slice(1, -1)) }
+        catch (_) { return match }
+      })
       .replace(/https?:\/\/\S+/g, match => `<a href="${match}" target="_blank" style="color: cornflowerblue">${match.slice(0, 100) + (match.length > 100 ? '...' : '')}</a>`)
       .replace(new RegExp('@(' + usernames.join('|') + ')', 'g'), match => `<span style="color: gold">${match}</span>`),
     { folder: 'svg', ext: '.svg' }
@@ -49,5 +52,5 @@ export function randomApiKey() {
 }
 
 export function copyToClipboard(text) {
-  navigator.clipboard.writeText(text);
+  navigator.clipboard.writeText(text)
 }

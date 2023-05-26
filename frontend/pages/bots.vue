@@ -1,5 +1,5 @@
 <script setup>
-import { doc, updateDoc, increment, arrayUnion, arrayRemove, collection, query, where, orderBy } from '@firebase/firestore'
+import { doc, updateDoc, increment, arrayUnion, arrayRemove, collection, query, where, orderBy } from 'firebase/firestore'
 
 const { $firestore } = useNuxtApp()
 const authUser = useFirebaseAuth()
@@ -77,8 +77,11 @@ async function deleteBot(bot) {
   <p v-if="bots.length === 0">No bots yet</p>
   <TransitionGroup v-else tag="main">
     <article v-for="bot of bots" :key="bot" class="bot">
-      <div v-html="compileText(chats.find(chat => chat.id === bot)?.name ?? '', [])" />
-      <button @click="deleteBot(bot)">Delete</button>
+      <div v-html="`<span style='color: gold'>[${chats.find(chat => chat.id === bot)?.id}]</span> ` + compileText(chats.find(chat => chat.id === bot)?.name ?? '', [])" />
+      <div class="buttons">
+        <button class="copy" @click="copyToClipboard(chats.find(chat => chat.id === bot)?.id)">Copy</button>
+        <button class="delete" @click="deleteBot(bot)">Delete</button>
+      </div>
     </article>
   </TransitionGroup>
   <form class="new-bot" @submit.prevent>
@@ -154,6 +157,21 @@ article:has(+ article + article:where(:hover, :focus-visible)), article:where(:h
   transition-duration: 1s;
 }
 
+.buttons {
+  display: flex;
+  gap: .5rem;
+}
+
+.copy {
+  color: lightskyblue;
+  border: 1px solid lightskyblue;
+}
+
+.delete {
+  color: #ffa1d5;
+  border: 1px solid #ffa1d5;
+}
+
 .new-bot {
   display: flex;
   align-items: center;
@@ -177,11 +195,6 @@ article:has(+ article + article:where(:hover, :focus-visible)), article:where(:h
 
 .bot div span:last-child {
   font-size: .5em;
-}
-
-.bot button {
-  color: #ffa1d5;
-  border: 1px solid #ffa1d5;
 }
 
 .info {

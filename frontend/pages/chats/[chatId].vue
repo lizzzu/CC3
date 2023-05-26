@@ -1,5 +1,5 @@
 <script setup>
-import { doc, updateDoc, collection, arrayUnion, Timestamp, increment } from '@firebase/firestore'
+import { doc, updateDoc, collection, arrayUnion, Timestamp, increment } from 'firebase/firestore'
 
 const { chatId } = useRoute().params
 const { $firestore } = useNuxtApp()
@@ -60,7 +60,7 @@ const usersNotInChat = computed(() => {
 const newMessage = ref('')
 
 function tryMention(event) {
-  const tag = newMessage.value.match(/@(?<tag>.*)$/)?.groups.tag
+  const tag = newMessage.value.match(/@(?<tag>[^@]*)$/)?.groups.tag
   if (tag == null) return
   const validUsernames = usernamesInChat.value.filter(username => username.toLowerCase().startsWith(tag.toLowerCase()))
   if (validUsernames.length !== 1) return
@@ -71,10 +71,10 @@ function tryMention(event) {
 async function sendMessage() {
   const newName = newMessage.value.match(/^\$ rename (?<newName>.+)/)?.groups.newName
   if (newName != null) {
-    await updateDoc(doc(collection($firestore, 'chats'), chatId), {
+    await updateDoc(doc($firestore, 'chats', chatId), {
       name: newName
     })
-    await updateDoc(doc(collection($firestore, 'chats'), chatId), {
+    await updateDoc(doc($firestore, 'chats', chatId), {
       messages: arrayUnion({
         text: `Chat renamed to ${newName}.`,
         username: '',
@@ -83,7 +83,7 @@ async function sendMessage() {
     })
   }
   else {
-    await updateDoc(doc(collection($firestore, 'chats'), chatId), {
+    await updateDoc(doc($firestore, 'chats', chatId), {
       messages: arrayUnion({
         text: newMessage.value,
         username: authUser.value.displayName,
@@ -97,14 +97,14 @@ async function sendMessage() {
 const newUser = ref(null)
 
 async function addUser() {
-  await updateDoc(doc(collection($firestore, 'chats'), chatId), {
+  await updateDoc(doc($firestore, 'chats', chatId), {
     messages: arrayUnion({
       text: `User ${newUser.value.username} ${randomJoinMessage()}`,
       username: '',
       timestamp: Timestamp.now()
     })
   })
-  await updateDoc(doc(collection($firestore, 'chats'), chatId), {
+  await updateDoc(doc($firestore, 'chats', chatId), {
     userIds: arrayUnion(newUser.value.id)
   })
 }
@@ -148,7 +148,7 @@ async function uploadPhoto(file) {
       <main ref="main">
         <div v-for="(message, index) of messages" class="message">
           <div v-if="message.username !== '$'" :class="{ special: index > 0 && message.username === messages[index - 1].username && message.timestamp - messages[index - 1].timestamp < 5 }">
-            <p class="user">{{ message.username }}</p>
+            <p class="user" :class="{ bot: message.username === 'BOT' }">{{ message.username }}</p>
             <p class="time">{{ timestampToString(message.timestamp) }}</p>
           </div>
           <!-- TODO @lizzzu -->
@@ -224,6 +224,10 @@ h1 {
 
 .message .user {
   color: #ffa1d5;
+}
+
+.message .user.bot {
+  color: gold;
 }
 
 .message .time {

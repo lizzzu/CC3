@@ -1,4 +1,4 @@
-import { onSnapshot } from '@firebase/firestore'
+import { onSnapshot } from 'firebase/firestore'
 
 export function useSnapshot(query, callback) {
   let unsubscribe = () => { }
