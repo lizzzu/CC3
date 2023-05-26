@@ -136,7 +136,7 @@ async function uploadPhoto(file) {
   <div v-if="chat != null">
     <header>
       <NuxtLink to="/chats" class="to-chats">← Back to chats</NuxtLink>
-      <h1>{{ chat.name }}</h1>
+      <h1 v-html="compileText(chat.name, [])" />
       <form @submit.prevent>
         <select v-model="newUser">
           <option :value="null" disabled>New user</option>
@@ -161,7 +161,7 @@ async function uploadPhoto(file) {
               message.username === '' ? 'center' :
               message.username === authUser.displayName ? 'right' : 'left',
             ...(message.username === '' ? { color: '#666' } : { })
-          }" v-html="compileMessage(message.text, usernamesInChat)" />
+          }" v-html="compileText(message.text, usernamesInChat)" />
         </div>
       </main>
     </div>

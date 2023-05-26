@@ -1,4 +1,5 @@
 import katex from 'katex'
+import twemoji from 'twemoji'
 
 export function randomJoinMessage() {
   const messages = [
@@ -25,15 +26,15 @@ export function timestampToString(timestamp) {
   })
 }
 
-export function compileMessage(message, usernames) {
-  return message
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replace(/\$.+\$/g, match => katex.renderToString(match.slice(1, -1)))
-    .replace(/https?:\/\/\S+/g, match => `<a href="${match}" target="_blank" style="color: cornflowerblue">${match.slice(0, 100) + (match.length > 100 ? '...' : '')}</a>`)
-    .replace(
-      new RegExp('@(' + usernames.join('|') + ')', 'g'),
-      match => `<span style="color: gold">${match}</span>`
-    )
+export function compileText(text, usernames) {
+  return twemoji.parse(
+    text
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replace(/\$.+\$/g, match => katex.renderToString(match.slice(1, -1)))
+      .replace(/https?:\/\/\S+/g, match => `<a href="${match}" target="_blank" style="color: cornflowerblue">${match.slice(0, 100) + (match.length > 100 ? '...' : '')}</a>`)
+      .replace(new RegExp('@(' + usernames.join('|') + ')', 'g'), match => `<span style="color: gold">${match}</span>`),
+    { folder: 'svg', ext: '.svg' }
+  )
 }

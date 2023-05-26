@@ -79,7 +79,7 @@ async function deleteChat(chatId) {
   <TransitionGroup v-else tag="main">
     <NuxtLink v-for="chat of chats" :to="`/chats/${chat.id}`" :key="chat.id" class="chat">
       <div>
-        <span>{{ chat.name }}</span>&nbsp;
+        <span v-html="compileText(chat.name, [])" />&nbsp;
         <span>{{ users.filter(user => user.id !== authUser.uid && chat.userIds.includes(user.id)).map(user => user.username).join(', ') }}</span>
       </div>
       <button @click="$event.preventDefault(); deleteChat(chat.id)">Delete</button>

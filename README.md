@@ -4,6 +4,7 @@ Eu vreau să mai fac din chestiile mărunte în primul rând:
 
 - [x] user is typing
 - [x] de combinat mesaje
+- [x] randare mai bună de twemoji
 - [x] tag numai la userii din chat
 - [x] tag prin tab
 - [x] inline markdown: `http(s)://` links
