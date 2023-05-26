@@ -38,3 +38,16 @@ export function compileText(text, usernames) {
     { folder: 'svg', ext: '.svg' }
   )
 }
+
+export function randomApiKey() {
+  const alphabet = 'qwertyuiopasdfghjklzxcvbnm1234567890!@#$%^&*()_+'
+  let apiKey = ''
+  for (let i = 0; i < 32; i++) {
+    apiKey += alphabet[Math.floor(Math.random() * alphabet.length)]
+  }
+  return apiKey
+}
+
+export function copyToClipboard(text) {
+  navigator.clipboard.writeText(text);
+}

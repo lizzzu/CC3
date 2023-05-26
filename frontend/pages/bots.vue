@@ -1,16 +1,30 @@
 <script setup>
-import { doc, updateDoc, arrayUnion, arrayRemove, collection, query, where, orderBy } from '@firebase/firestore'
+import { doc, updateDoc, increment, arrayUnion, arrayRemove, collection, query, where, orderBy } from '@firebase/firestore'
 
 const { $firestore } = useNuxtApp()
 const authUser = useFirebaseAuth()
 
 const tokenCount = ref(null)
 const bots = ref([])
+const apiKey = ref(null)
 
 useSnapshot(doc($firestore, 'users', authUser.value.uid), async userSnapshot => {
   tokenCount.value = userSnapshot.data().tokenCount
   bots.value = [...userSnapshot.data().bots]
+  apiKey.value = userSnapshot.data().apiKey
 })
+
+async function generateApiKey() {
+  await updateDoc(doc($firestore, 'users', authUser.value.uid), {
+    apiKey: randomApiKey()
+  })
+}
+
+async function buyTokens() {
+  await updateDoc(doc($firestore, 'users', authUser.value.uid), {
+    tokenCount: increment(100)
+  })
+}
 
 const chats = ref([])
 
@@ -49,6 +63,17 @@ async function deleteBot(bot) {
     <NuxtLink to="/chats" class="to-chats">← Back to chats</NuxtLink>
     <h1>My Chat Bots</h1>
   </header>
+  <div class="info">
+    <p>Your API key</p>
+    <p class="wide">{{ apiKey ?? 'No API key yet' }}</p>
+    <button @click="generateApiKey">{{ apiKey == null ? 'Generate' : 'Regenerate' }}</button>
+    <button @click="copyToClipboard(apiKey)" :disabled="apiKey == null" :title="apiKey == null ? 'No API key to copy!' : ''">Copy</button>
+  </div>
+  <div class="info">
+    <p>Your token count</p>
+    <p class="wide">{{ tokenCount }}</p>
+    <button @click="buyTokens">Buy 100 tokens!</button>
+  </div>
   <p v-if="bots.length === 0">No bots yet</p>
   <TransitionGroup v-else tag="main">
     <article v-for="bot of bots" :key="bot" class="bot">
@@ -157,6 +182,38 @@ article:has(+ article + article:where(:hover, :focus-visible)), article:where(:h
 .bot button {
   color: #ffa1d5;
   border: 1px solid #ffa1d5;
+}
+
+.info {
+  display: flex;
+  align-items: stretch;
+  gap: .5rem;
+  margin: .5rem 0;
+}
+
+.info:last-of-type {
+  margin-bottom: 1rem;
+}
+
+.info * {
+  font-size: 1rem;
+  background-color: #444;
+}
+
+.info p {
+  margin: 0;
+}
+
+.info button {
+  background-color: #333;
+}
+
+.info button:where(:hover, :focus-visible) {
+  background-color: #444;
+}
+
+.info .wide {
+  flex-grow: 1;
 }
 
 @media (max-width: 700px) {
