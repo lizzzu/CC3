@@ -1,5 +1,4 @@
 <script setup>
-import { watch } from 'vue'
 import { doc, updateDoc, collection, arrayUnion, Timestamp, increment } from '@firebase/firestore'
 
 const { chatId } = useRoute().params
@@ -147,7 +146,7 @@ async function uploadPhoto(file) {
     </header>
     <div class="main-wrapper">
       <main ref="main">
-        <div v-for="(message, index) in messages" class="message">
+        <div v-for="(message, index) of messages" class="message">
           <div v-if="message.username !== '$'" :class="{ special: index > 0 && message.username === messages[index - 1].username && message.timestamp - messages[index - 1].timestamp < 5 }">
             <p class="user">{{ message.username }}</p>
             <p class="time">{{ timestampToString(message.timestamp) }}</p>

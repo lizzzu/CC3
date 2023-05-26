@@ -3,7 +3,7 @@ import { doc, getDoc } from '@firebase/firestore'
 export default defineNuxtRouteMiddleware(async to => {
   const nuxtApp = useNuxtApp()
   const authUser = useFirebaseAuth()
-  if (authUser.value == null && to.path.startsWith('/chats')) {
+  if (authUser.value == null && (to.path.startsWith('/chats') || to.path.startsWith('/bots'))) {
     return navigateTo('/')
   }
   if (authUser.value != null) {

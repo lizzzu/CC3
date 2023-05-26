@@ -72,6 +72,7 @@ async function deleteChat(chatId) {
     <Title>Chats</Title>
   </Head>
   <header>
+    <NuxtLink to="/bots" class="to-bots">Go to bots</NuxtLink>
     <button @click="logOut">Sign out</button>
     <h1>Chats</h1>
   </header>
@@ -105,6 +106,21 @@ async function deleteChat(chatId) {
 
 header {
   position: relative;
+}
+
+header .to-bots {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 1rem;
+  background: none;
+  border: none;
+}
+
+header .to-bots:where(:hover, :focus-visible) {
+  text-decoration: underline 1px dashed #aaa;
+  text-underline-offset: .3em;
+  transform: scale(1);
 }
 
 header button {
@@ -173,10 +189,6 @@ a:has(+ a + a:where(:hover, :focus-visible)), a:where(:hover, :focus-visible) + 
 .chat div span:last-child {
   font-size: .5em;
 }
-
-/* .chat:not(:hover) div span:last-child {
-  display: none;
-} */
 
 .chat button {
   color: #ffa1d5;
