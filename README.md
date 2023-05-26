@@ -28,7 +28,7 @@ document.getElementById(messageId).scrollIntoView()
 
 ## 🤖 Boți
 
-Facem o pagină `/bots` pentru userii logați. Aceasta o să conțină numărul de tokeni (aici intervine ideea furată de la Fireship), inițial 100 sau ceva de test. Putem re(genera) o cheie de API, putem crea sau șterge boți și putem adăuga boți la chaturi (din care facem parte și noi). Expunem API-ul (nu tocmai cum era și în documentație, adică acum avem nevoie doar de ruta `/api/message`, nu și de `/api/create`). Evident, când trimitem un request o să trimitem și cheia API, iar serverul va verifica și faptul că avem suficienți tokeni (1 per mesaj). Putem cumpăra tokeni (câte 100 la 1$) folosind un cont de test Stripe (cu **Run Payments with Stripe**).
+Facem o pagină `/bots` pentru userii logați. Aceasta o să conțină numărul de tokeni (aici intervine ideea furată de la Fireship), inițial 10 sau ceva de test. Putem re(genera) o cheie de API și putem crea sau șterge boți, câte unul pentru fiecare chat din care facem parte și noi. Expunem API-ul (nu tocmai cum era și în documentație, adică acum avem nevoie doar de ruta `/api/message`, nu și de `/api/create`). Evident, când trimitem un request o să trimitem și cheia API, iar serverul va verifica și faptul că avem suficienți tokeni (1 per mesaj). Putem cumpăra tokeni (câte 100 la 1$) folosind un cont de test Stripe (cu **Run Payments with Stripe**).
 
 ---
 

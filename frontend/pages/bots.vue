@@ -1,10 +1,47 @@
 <script setup>
-const bots = [
-  'id-chat-1',
-  'id-chat-2'
-]
+import { doc, updateDoc, arrayUnion, arrayRemove, collection, query, where, orderBy } from '@firebase/firestore'
 
-const conversationId = ref('')
+const { $firestore } = useNuxtApp()
+const authUser = useFirebaseAuth()
+
+const tokenCount = ref(null)
+const bots = ref([])
+
+useSnapshot(doc($firestore, 'users', authUser.value.uid), async userSnapshot => {
+  tokenCount.value = userSnapshot.data().tokenCount
+  bots.value = [...userSnapshot.data().bots]
+})
+
+const chats = ref([])
+
+useSnapshot(query(
+  collection($firestore, 'chats'),
+  where('userIds', 'array-contains', authUser.value.uid),
+  orderBy('name')
+), chatsSnapshot => {
+  const chatDocs = []
+  chatsSnapshot.forEach(chat => {
+    chatDocs.push({
+      id: chat.id,
+      name: chat.data().name
+    })
+  })
+  chats.value = chatDocs
+})
+
+const chatId = ref('')
+
+async function addBot() {
+  await updateDoc(doc($firestore, 'users', authUser.value.uid), {
+    bots: arrayUnion(chatId.value)
+  })
+}
+
+async function deleteBot(bot) {
+  await updateDoc(doc($firestore, 'users', authUser.value.uid), {
+    bots: arrayRemove(bot)
+  })
+}
 </script>
 
 <template>
@@ -15,16 +52,16 @@ const conversationId = ref('')
   <p v-if="bots.length === 0">No bots yet</p>
   <TransitionGroup v-else tag="main">
     <article v-for="bot of bots" :key="bot" class="bot">
-      <div>{{ bot }}</div>
+      <div v-html="compileText(chats.find(chat => chat.id === bot)?.name ?? '', [])" />
       <button @click="deleteBot(bot)">Delete</button>
     </article>
   </TransitionGroup>
   <form class="new-bot" @submit.prevent>
-    <select v-model="conversationId">
-      <option value="" disabled>Choose bot's conversation</option>
-      <option v-for="conversation of conversations" :value="conversation.id">{{ conversation.name }}</option>
+    <select v-model="chatId">
+      <option value="" disabled>Choose bot's chat</option>
+      <option v-for="chat of chats.filter(chat => !bots.includes(chat.id))" :value="chat.id">{{ chat.name }}</option>
     </select>
-    <button @click="addBot" :disabled="conversationId === ''">Create new bot</button>
+    <button @click="addBot" :disabled="chatId === ''">Create new bot</button>
   </form>
 </template>
 
@@ -99,7 +136,7 @@ article:has(+ article + article:where(:hover, :focus-visible)), article:where(:h
   gap: .3rem;
 }
 
-.new-bot input {
+.new-bot select {
   flex: 1;
 }
 
@@ -133,7 +170,7 @@ article:has(+ article + article:where(:hover, :focus-visible)), article:where(:h
     flex-direction: column;
   }
 
-  .new-bot input {
+  .new-bot select {
     min-width: 100%;
   }
 }
