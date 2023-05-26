@@ -12,4 +12,7 @@ export default defineNuxtPlugin(nuxtApp => {
   nuxtApp.provide('auth', auth)
   nuxtApp.provide('firestore', firestore)
   nuxtApp.provide('messaging', messaging)
+  // TODO @lizzzu
+  // așa cum am expus până acum `auth`/ `firestore`/ `messaging`
+  // așa trebuie acum expus și `storage`
 })

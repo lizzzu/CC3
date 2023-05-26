@@ -110,8 +110,22 @@ async function addUser() {
   })
 }
 
-async function uploadPhoto(photo) {
-  // TODO
+async function uploadPhoto(file) {
+  // TODO @lizzzu
+  // din `file` o să iei numele fișierului cu `.name`
+  // și de urcat îl urci cu `uploadBytes(fileRef, file)`
+  //
+  // `fileRef` e referința la fișier în storage
+  // adică un path de genul `a/b/c.png`, așa cum e și în firestore
+  // la noi `fileRef` o să fie direct `file.name`
+  //
+  // o să trebuiască să creezi și un document în firestore
+  // mai precis să adaugi un mesaj special la chatul curent
+  // care să conțină numele fișierului în `.fileName`
+  // și descrierea sa generată de ai în `.imageDescription` (inițial `''`)
+  //
+  // după ce termini toate astea, vedem cu optimizarea și cu ai-ul
+  // cred că fac eu una și sperând că merge ușor îți dau ție cealaltă
 }
 </script>
 
@@ -138,6 +152,10 @@ async function uploadPhoto(photo) {
             <p class="user">{{ message.username }}</p>
             <p class="time">{{ timestampToString(message.timestamp) }}</p>
           </div>
+          <!-- TODO @lizzzu -->
+          <!-- `p`-ul de mai jos ar trebui să conțină un `v-if` -->
+          <!-- dacă `message` conține câmpul `fileName` o să afișezi imagine, altfel paragraf -->
+          <!-- ca să iei URL-ul propriu-zis al unei imagini din storage ai funcția `getDownloadURL(storage, fileName)` -->
           <p :style="{
             textAlign:
               message.username === '' ? 'center' :

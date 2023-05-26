@@ -8,6 +8,9 @@ function onChange(event) {
 
 <template>
   <label>
+    <!-- TODO @lizzzu -->
+    <!-- știu că voiai mai multe tipuri de fișiere -->
+    <!-- tre să modifici `accept`, o să vezi că-i simplu -->
     <input type="file" accept="image/png" @change="onChange" />
     <slot />
   </label>
