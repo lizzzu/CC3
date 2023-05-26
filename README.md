@@ -15,7 +15,7 @@ Eu vreau să mai fac din chestiile mărunte în primul rând:
 
 ## 📸 Poze
 
-Încărcăm poza în Storage. Se triggăruiește o funcție cloud. Aceasta optimizează imaginea (cu **Image Processing API**) și îi generează descrierea (cu **Label Images with Cloud Vision AI**) pe care o stochează în Firestore. Pozele trimise într-un chat vor fi un tip special de mesaj în Firestore (un obiect cu câmpurile `imageUrl` și `imageDescription`).
+Încărcăm poza în Storage. Se triggăruiește o funcție cloud. Aceasta optimizează imaginea (cu **Image Processing API**) și îi generează descrierea (cu **Label Images with Cloud Vision AI**) pe care o stochează în Firestore. Pozele trimise într-un chat vor fi un tip special de mesaj în Firestore (un obiect cu câmpurile `fileName` și `imageDescription`).
 
 ## 🔎 Căutare
 
