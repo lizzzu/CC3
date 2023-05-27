@@ -1,5 +1,5 @@
 <script setup>
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
+import { signInWithPopup, GoogleAuthProvider } from '@firebase/auth'
 
 const { $auth } = useNuxtApp()
 const authUser = useFirebaseAuth()

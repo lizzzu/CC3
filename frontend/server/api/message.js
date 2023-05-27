@@ -1,6 +1,6 @@
-import { initializeApp } from 'firebase/app'
-import { getFirestore, updateDoc, increment, arrayUnion, doc, getDoc, getDocs, query, collection, where, Timestamp } from 'firebase/firestore'
 import firebaseConfig from '@/firebase.config.js'
+import { initializeApp } from '@firebase/app'
+import { getFirestore, updateDoc, increment, arrayUnion, doc, getDoc, getDocs, query, collection, where, Timestamp } from '@firebase/firestore'
 
 const app = initializeApp(firebaseConfig)
 const $firestore = getFirestore(app)
@@ -22,7 +22,7 @@ export default defineEventHandler(async event => {
       statusMessage: 'Wrong bot ID!'
     })
   }
-  const { tokenCount } = users[0];
+  const { tokenCount } = users[0]
   if (tokenCount === 0) {
     throw createError({
       statusCode: 402,

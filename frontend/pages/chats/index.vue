@@ -1,6 +1,6 @@
 <script setup>
-import { signOut } from 'firebase/auth'
-import { doc, addDoc, deleteDoc, collection, query, where, orderBy } from 'firebase/firestore'
+import { signOut } from '@firebase/auth'
+import { doc, addDoc, deleteDoc, collection, query, where, orderBy } from '@firebase/firestore'
 
 const { $auth, $firestore } = useNuxtApp()
 const authUser = useFirebaseAuth()
@@ -55,7 +55,7 @@ async function addChat() {
     name: newChatName.value,
     userIds: [authUser.value.uid],
     messages: [],
-    typingCount: 0
+    typing: { }
   })
   newChatName.value = ''
 }

@@ -1,8 +1,8 @@
-import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
-import { getMessaging } from 'firebase/messaging'
 import firebaseConfig from '@/firebase.config.js'
+import { initializeApp } from '@firebase/app'
+import { getAuth } from '@firebase/auth'
+import { getFirestore } from '@firebase/firestore'
+import { getMessaging } from '@firebase/messaging'
 
 export default defineNuxtPlugin(nuxtApp => {
   const app = initializeApp(firebaseConfig)

@@ -1,4 +1,4 @@
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc } from '@firebase/firestore'
 
 export default defineNuxtRouteMiddleware(async to => {
   const { $firestore } = useNuxtApp()

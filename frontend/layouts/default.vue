@@ -1,6 +1,6 @@
 <script setup>
-import { getToken } from 'firebase/messaging'
-import { doc, updateDoc } from 'firebase/firestore'
+import { getToken } from '@firebase/messaging'
+import { doc, updateDoc } from '@firebase/firestore'
 
 const { $messaging, $firestore } = useNuxtApp()
 const authUser = useFirebaseAuth()

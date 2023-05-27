@@ -1,5 +1,5 @@
 <script setup>
-import { doc, updateDoc, increment, arrayUnion, arrayRemove, collection, query, where, orderBy } from 'firebase/firestore'
+import { doc, updateDoc, increment, arrayUnion, arrayRemove, collection, query, where, orderBy } from '@firebase/firestore'
 
 const { $firestore } = useNuxtApp()
 const authUser = useFirebaseAuth()

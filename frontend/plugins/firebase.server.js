@@ -1,6 +1,6 @@
-import { initializeApp } from 'firebase/app'
-import { getFirestore } from 'firebase/firestore'
 import firebaseConfig from '@/firebase.config.js'
+import { initializeApp } from '@firebase/app'
+import { getFirestore } from '@firebase/firestore'
 
 export default defineNuxtPlugin(nuxtApp => {
   const app = initializeApp(firebaseConfig)

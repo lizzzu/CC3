@@ -1,5 +1,5 @@
 <script setup>
-import { doc, updateDoc, collection, arrayUnion, Timestamp, increment } from 'firebase/firestore'
+import { doc, updateDoc, collection, arrayUnion, Timestamp } from '@firebase/firestore'
 
 const { chatId } = useRoute().params
 const { $firestore } = useNuxtApp()
@@ -16,19 +16,25 @@ useSnapshot(doc($firestore, 'chats', chatId), async chatSnapshot => {
   setTimeout(() => main.value.scrollTop = 1e9, 0)
 })
 
-const typing = ref(false)
+const typingCount = ref(0)
 
-watch(typing, async newTyping => {
-  await updateDoc(doc($firestore, 'chats', chatId), {
-    typingCount: increment(newTyping ? +1 : -1)
-  })
-})
+useInterval(() => {
+  if (chat.value == null) return
+  let count = 0
+  for (const userId in chat.value.typing) {
+    if (userId === authUser.value.uid) continue
+    if (Timestamp.now() - chat.value.typing[userId] < 3) {
+      count++
+    }
+  }
+  typingCount.value = count
+}, 1000)
 
 const messages = computed(() => {
   const messages = [...chat.value.messages]
-  if (chat.value.typingCount > 1 || chat.value.typingCount === 1 && !typing.value) {
+  if (typingCount.value > 0) {
     messages.push({
-      text: 'Somebody is typing...',
+      text: (typingCount.value === 1 ? '1 person is' : typingCount.value + ' people are') + ' typing...',
       username: '$',
       timestamp: Timestamp.now()
     })
@@ -93,6 +99,12 @@ async function sendMessage() {
   }
   newMessage.value = ''
 }
+
+watch(newMessage, async newNewMessage => {
+  const typing = { }
+  typing[authUser.value.uid] = newNewMessage === '' ? Timestamp.fromMillis(0) : Timestamp.now()
+  await updateDoc(doc($firestore, 'chats', chatId), { typing })
+})
 
 const newUser = ref(null)
 
@@ -166,7 +178,7 @@ async function uploadPhoto(file) {
     </div>
     <form class="new-message" @submit.prevent>
       <FileInput @upload="uploadPhoto">Send photo</FileInput>
-      <input v-model.trim="newMessage" @keydown.tab="tryMention" placeholder="Type..." @focusin="typing = true" @focusout="typing = false" />
+      <input v-model.trim="newMessage" @keydown.tab="tryMention" placeholder="Type..." />
       <button @click="sendMessage" :disabled="newMessage === ''">Send</button>
     </form>
   </div>
