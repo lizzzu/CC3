@@ -15,8 +15,14 @@
     "nuxt": "^3.4.3"
   },
   "dependencies": {
+    "@stripe/firestore-stripe-payments": "^0.0.6",
     "firebase": "^9.0.1",
     "katex": "^0.16.7",
     "twemoji": "^14.0.2"
+  },
+  "resolutions": {
+    "@firebase/app": "^0.7.5",
+    "@firebase/auth": "^0.17.2",
+    "@firebase/firestore": "^3.2.0"
   }
 }

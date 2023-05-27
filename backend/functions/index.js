@@ -12,7 +12,7 @@ export const addUserToFirestore = functions.auth.user().onCreate(async user => {
 })
 
 export const notifyUser = functions.firestore.document('chats/{chatId}').onUpdate(async (change, context) => {
-  const chatId = context.params.chatId
+  const { chatId } = context.params
   const newChat = change.after.data()
   const oldChat = change.before.data()
   if (newChat.userIds.length === oldChat.userIds.length + 1) {
@@ -26,4 +26,12 @@ export const notifyUser = functions.firestore.document('chats/{chatId}').onUpdat
       }
     })
   }
+})
+
+export const updateBalance = functions.firestore.document('users/{userId}/payments/{paymentId}').onCreate(async (snapshot, context) => {
+  const { userId } = context.params
+  const tokenCount = 100 * (snapshot.data().items[0].quantity ?? 1)
+  admin.firestore().collection('users').doc(userId).update({
+    tokenCount: admin.firestore.FieldValue.increment(tokenCount)
+  })
 })

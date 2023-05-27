@@ -1,7 +1,8 @@
 <script setup>
-import { doc, updateDoc, increment, arrayUnion, arrayRemove, collection, query, where, orderBy } from '@firebase/firestore'
+import { doc, updateDoc, arrayUnion, arrayRemove, collection, query, where, orderBy } from '@firebase/firestore'
+import { createCheckoutSession } from '@stripe/firestore-stripe-payments'
 
-const { $firestore } = useNuxtApp()
+const { $firestore, $payments } = useNuxtApp()
 const authUser = useFirebaseAuth()
 
 const tokenCount = ref(null)
@@ -20,10 +21,15 @@ async function generateApiKey() {
   })
 }
 
+const tokenCountToBuy = ref(100)
+
 async function buyTokens() {
-  await updateDoc(doc($firestore, 'users', authUser.value.uid), {
-    tokenCount: increment(100)
+  const session = await createCheckoutSession($payments, {
+    mode: 'payment',
+    price: 'price_1NCQ7DBCY48b4Ldy5XLvLx9L',
+    quantity: tokenCountToBuy.value / 100
   })
+  window.location.assign(session.url)
 }
 
 const chats = ref([])
@@ -64,15 +70,16 @@ async function deleteBot(bot) {
     <h1>My Chat Bots</h1>
   </header>
   <div class="info">
-    <p>Your API key</p>
-    <p class="wide">{{ apiKey ?? 'No API key yet' }}</p>
+    <p class="wide">Your API key: <span>{{ apiKey ?? 'No API key yet' }}</span></p>
     <button @click="generateApiKey">{{ apiKey == null ? 'Generate' : 'Regenerate' }}</button>
     <button @click="copyToClipboard(apiKey)" :disabled="apiKey == null" :title="apiKey == null ? 'No API key to copy!' : ''">Copy</button>
   </div>
   <div class="info">
-    <p>Your token count</p>
-    <p class="wide">{{ tokenCount }}</p>
-    <button @click="buyTokens">Buy 100 tokens!</button>
+    <p class="wide">Your token count: <span>{{ tokenCount }}</span></p>
+    <div class="range">
+      <input v-model="tokenCountToBuy" type="range" min="100" max="1000" step="100" />
+    </div>
+    <button @click="buyTokens">Buy {{ tokenCountToBuy }} tokens!</button>
   </div>
   <p v-if="bots.length === 0">No bots yet</p>
   <TransitionGroup v-else tag="main">
@@ -227,6 +234,20 @@ article:has(+ article + article:where(:hover, :focus-visible)), article:where(:h
 
 .info .wide {
   flex-grow: 1;
+}
+
+.info .wide span {
+  color: lightskyblue;
+}
+
+.range {
+  display: flex;
+  padding: .5rem;
+  background-color: #444;
+}
+
+.range input {
+  padding: 0;
 }
 
 @media (max-width: 700px) {
