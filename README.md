@@ -18,14 +18,6 @@ Eu vreau să mai fac din chestiile mărunte în primul rând:
 
 Încărcăm poza în Storage. Se triggăruiește o funcție cloud. Aceasta optimizează imaginea (cu **Image Processing API**) și îi generează descrierea (cu **Label Images with Cloud Vision AI**) pe care o stochează în Firestore. Pozele trimise într-un chat vor fi un tip special de mesaj în Firestore (un obiect cu câmpurile `fileName` și `imageDescription`).
 
-## 🔎 Căutare
-
-Fiecare chat o să aibă un buton de search. Acesta o să caute text printre mesaje (cu **Search Firestore with Algolia**), o să returneze (în UI) o listă cu mesajele respective și cu textul corespunzător din ele evidențiat. Dând click pe un mesaj anume vom fi duși la mesajul propriu-zis din chat:
-
-```js
-document.getElementById(messageId).scrollIntoView()
-```
-
 ## 🤖 Boți
 
 Facem o pagină `/bots` pentru userii logați. Aceasta o să conțină numărul de tokeni (aici intervine ideea de la Fireship), inițial 10 sau ceva de test. Putem re(genera) o cheie de API și putem crea sau șterge boți, câte unul pentru fiecare chat din care facem parte și noi. Expunem API-ul (nu tocmai cum era și în documentație, adică acum avem nevoie doar de ruta `/api/message`, nu și de `/api/create`). Evident, când trimitem un request o să trimitem și cheia API, iar serverul va verifica și faptul că avem suficienți tokeni (1 per mesaj). Putem cumpăra tokeni (câte 100 la 1$) folosind un cont de test Stripe (cu **Run Payments with Stripe**).
