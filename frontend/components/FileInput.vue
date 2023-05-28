@@ -2,7 +2,9 @@
 const emit = defineEmits(['upload'])
 
 function onChange(event) {
-  emit('upload', event.target.files[0])
+  if (event.target.files.length === 1) {
+    emit('upload', event.target.files[0])
+  }
 }
 </script>
 

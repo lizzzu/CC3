@@ -1,13 +1,25 @@
 <script setup>
+import { query, collection, where } from '@firebase/firestore'
 import { getDownloadURL, ref as storageRef } from '@firebase/storage'
 
-const { $storage } = useNuxtApp()
+const { $firestore, $storage } = useNuxtApp()
 
-const { imageName } = defineProps(['imageName'])
+const { imageName, align } = defineProps(['imageName', 'align'])
 const imageUrl = ref('')
 
 onMounted(async () => {
   imageUrl.value = await getDownloadURL(storageRef($storage, `images/${imageName}`))
+})
+
+const labels = ref([])
+
+useSnapshot(query(
+  collection($firestore, 'imageLabels'),
+  where('file', '==', `gs://upheld-garage-381905.appspot.com/images/${imageName}`)
+), labelsSnapshot => {
+  labelsSnapshot.forEach(document => {
+    labels.value = document.data().labels
+  })
 })
 
 const optimizedImageUrl = computed(() => {
@@ -28,7 +40,14 @@ const optimizedImageUrl = computed(() => {
 
 <template>
   <p v-if="imageUrl === ''">Loading image...</p>
-  <img v-else :src="optimizedImageUrl" :alt="imageName">
+  <template v-if="align === 'left'">
+    <img :src="optimizedImageUrl" :alt="labels.join(', ')">
+    <p v-html="labels.join('<br />')"></p>
+  </template>
+  <template v-else>
+    <p v-html="labels.join('<br />')"></p>
+    <img :src="optimizedImageUrl" :alt="labels.join(', ')">
+  </template>
 </template>
 
 <style scoped>
@@ -36,5 +55,6 @@ img {
   height: auto;
   max-height: 400px;
   max-width: 60%;
+  margin: .1rem .4rem;
 }
 </style>

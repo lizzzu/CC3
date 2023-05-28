@@ -163,7 +163,7 @@ async function uploadPhoto(file) {
             message.username === '' ? 'center' :
             message.username === authUser.displayName ? 'right' : 'left'"
           >
-            <LoadingImage v-if="'imageName' in message" :imageName="message.imageName" />
+            <LoadingImage v-if="'imageName' in message" :imageName="message.imageName" :align="message.username === authUser.displayName ? 'right' : 'left'" />
             <p v-else :style="{
               ...(message.username === '' ? { color: '#666' } : { })
             }" v-html="compileText(message.text, usernamesInChat)" />
