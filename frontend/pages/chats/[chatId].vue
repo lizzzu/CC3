@@ -163,9 +163,7 @@ async function uploadPhoto(file) {
             message.username === '' ? 'center' :
             message.username === authUser.displayName ? 'right' : 'left'"
           >
-            <div v-if="'imageName' in message">
-              <LoadingImage :imageName="message.imageName" />
-            </div>
+            <LoadingImage v-if="'imageName' in message" :imageName="message.imageName" />
             <p v-else :style="{
               ...(message.username === '' ? { color: '#666' } : { })
             }" v-html="compileText(message.text, usernamesInChat)" />
@@ -335,10 +333,6 @@ main > :last-child {
 }
 
 @media (max-width: 700px) {
-  .message div {
-    flex-direction: column;
-  }
-
   .new-message {
     flex-direction: column;
   }
