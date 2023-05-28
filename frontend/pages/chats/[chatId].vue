@@ -1,8 +1,9 @@
 <script setup>
 import { doc, updateDoc, collection, arrayUnion, Timestamp } from '@firebase/firestore'
+import { uploadBytes, ref as storageRef } from '@firebase/storage'
 
 const { chatId } = useRoute().params
-const { $firestore } = useNuxtApp()
+const { $firestore, $storage } = useNuxtApp()
 const authUser = useFirebaseAuth()
 
 const chat = ref(null)
@@ -122,21 +123,16 @@ async function addUser() {
 }
 
 async function uploadPhoto(file) {
-  // TODO @lizzzu
-  // din `file` o să iei numele fișierului cu `.name`
-  // și de urcat îl urci cu `uploadBytes(fileRef, file)`
-  //
-  // `fileRef` e referința la fișier în storage
-  // adică un path de genul `a/b/c.png`, așa cum e și în firestore
-  // la noi `fileRef` o să fie direct `file.name`
-  //
-  // o să trebuiască să creezi și un document în firestore
-  // mai precis să adaugi un mesaj special la chatul curent
-  // care să conțină numele fișierului în `.fileName`
-  // și descrierea sa generată de ai în `.imageDescription` (inițial `''`)
-  //
-  // după ce termini toate astea, vedem cu optimizarea și cu ai-ul
-  // cred că fac eu una și sperând că merge ușor îți dau ție cealaltă
+  const fileName = randomKey()
+  await uploadBytes(storageRef($storage, `images/${fileName}`), file)
+
+  await updateDoc(doc($firestore, 'chats', chatId), {
+    messages: arrayUnion({
+      imageName: `${fileName}`,
+      username: authUser.value.displayName,
+      timestamp: Timestamp.now()
+    })
+  })
 }
 </script>
 
@@ -163,16 +159,17 @@ async function uploadPhoto(file) {
             <p class="user" :class="{ bot: message.username === 'BOT' }">{{ message.username }}</p>
             <p class="time">{{ timestampToString(message.timestamp) }}</p>
           </div>
-          <!-- TODO @lizzzu -->
-          <!-- `p`-ul de mai jos ar trebui să conțină un `v-if` -->
-          <!-- dacă `message` conține câmpul `fileName` o să afișezi imagine, altfel paragraf -->
-          <!-- ca să iei URL-ul propriu-zis al unei imagini din storage ai funcția `getDownloadURL(storage, fileName)` -->
-          <p :style="{
-            textAlign:
-              message.username === '' ? 'center' :
-              message.username === authUser.displayName ? 'right' : 'left',
-            ...(message.username === '' ? { color: '#666' } : { })
-          }" v-html="compileText(message.text, usernamesInChat)" />
+          <div class="message-content" :class="
+            message.username === '' ? 'center' :
+            message.username === authUser.displayName ? 'right' : 'left'"
+          >
+            <div v-if="'imageName' in message">
+              <LoadingImage :imageName="message.imageName" />
+            </div>
+            <p v-else :style="{
+              ...(message.username === '' ? { color: '#666' } : { })
+            }" v-html="compileText(message.text, usernamesInChat)" />
+          </div>
         </div>
       </main>
     </div>
@@ -186,6 +183,25 @@ async function uploadPhoto(file) {
 </template>
 
 <style scoped>
+.message-content {
+  display: flex;
+}
+
+.message-content.left {
+  justify-content: left;
+  text-align: left;
+}
+
+.message-content.right {
+  justify-content: right;
+  text-align: right;
+}
+
+.message-content.center {
+  justify-content: center;
+  text-align: center;
+}
+
 header {
   position: relative;
 }

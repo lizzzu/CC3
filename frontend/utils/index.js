@@ -42,13 +42,13 @@ export function compileText(text, usernames) {
   )
 }
 
-export function randomApiKey() {
-  const alphabet = 'qwertyuiopasdfghjklzxcvbnm1234567890!@#$%^&*()_+'
-  let apiKey = ''
+export function randomKey() {
+  const alphabet = 'qwertyuiopasdfghjklzxcvbnm1234567890()_+'
+  let key = ''
   for (let i = 0; i < 32; i++) {
-    apiKey += alphabet[Math.floor(Math.random() * alphabet.length)]
+    key += alphabet[Math.floor(Math.random() * alphabet.length)]
   }
-  return apiKey
+  return key
 }
 
 export function copyToClipboard(text) {

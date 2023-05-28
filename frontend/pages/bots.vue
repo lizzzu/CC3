@@ -17,7 +17,7 @@ useSnapshot(doc($firestore, 'users', authUser.value.uid), async userSnapshot => 
 
 async function generateApiKey() {
   await updateDoc(doc($firestore, 'users', authUser.value.uid), {
-    apiKey: randomApiKey()
+    apiKey: randomKey()
   })
 }
 
