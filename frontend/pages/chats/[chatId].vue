@@ -202,6 +202,10 @@ async function uploadPhoto(file) {
   text-align: center;
 }
 
+.message-content p {
+  font-size: 1rem;
+}
+
 header {
   position: relative;
 }
